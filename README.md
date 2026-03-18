@@ -57,18 +57,18 @@ If you haven't already, make sure you have node and NVM installed.
    ```
 5. Install an ESLint plugin for your editor, for example
    [ESLint for VSCode](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-6. Install MongoDB
+6. Install MongoDB - pick the latest version available, at the time of writing this, it's @8.0. 
    ```
    brew tap mongodb/brew
-   brew install mongodb-community@6.0
+   brew install mongodb-community@8.0
    ```
    _Note:_ If you see a message that says
-   `If you need to have mongodb-community@6.0 first in your PATH, run:`, follow
+   `If you need to have mongodb-community@8.0 first in your PATH, run:`, follow
    the instruction. Restart your terminal after this.
 7. Start MongoDB
 
    ```
-   brew services start mongodb-community@6.0
+   brew services start mongodb-community@8.0
    ```
 
 ### Setting up environment variables.
