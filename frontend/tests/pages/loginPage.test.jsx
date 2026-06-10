@@ -29,7 +29,7 @@ async function completeLoginForm() {
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
-  await user.type(passwordInputEl, "1234");
+  await user.type(passwordInputEl, "Hello14!");
   await user.click(submitButtonEl);
 }
 
@@ -43,7 +43,7 @@ describe("Login Page", () => {
 
     await completeLoginForm();
 
-    expect(login).toHaveBeenCalledWith("test@email.com", "1234");
+    expect(login).toHaveBeenCalledWith("test@email.com", "Hello14!");
   });
 
   test("navigates to /posts on successful login", async () => {

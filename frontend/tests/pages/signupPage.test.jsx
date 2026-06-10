@@ -29,9 +29,10 @@ async function completeSignupForm() {
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
-  await user.type(passwordInputEl, "1234");
+  await user.type(passwordInputEl, "Hello14!");
   await user.click(submitButtonEl);
 }
+
 
 describe("Signup Page", () => {
   beforeEach(() => {
@@ -43,7 +44,7 @@ describe("Signup Page", () => {
 
     await completeSignupForm();
 
-    expect(signup).toHaveBeenCalledWith("test@email.com", "1234");
+    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!");
   });
 
   test("navigates to /login on successful signup", async () => {
@@ -66,4 +67,100 @@ describe("Signup Page", () => {
 
     expect(navigateMock).toHaveBeenCalledWith("/signup");
   });
+});
+
+test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "hello");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must contain at least 1 capital letter, a number and a special character!")
+});
+
+test("When user types password with no capital letter, error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "hello14!");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must contain at least 1 capital letter, a number and a special character!")
+});
+
+test("When user types password with no special char, error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "Hello123");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must contain at least 1 capital letter, a number and a special character!")
+});
+
+test("When user types password with no number, error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "Hello!!!");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must contain at least 1 capital letter, a number and a special character!")
+});
+
+test("When user types a password less than 8 characters long an error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "Hello!1");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must be between 8 and 12 characters long")
+});
+
+test("When user types a password more than 12 characters long an error occurs.", async () => {
+  render(<SignupPage />);
+
+  const user = userEvent.setup();
+
+  const emailInputEl = screen.getByLabelText("Email:");
+  const passwordInputEl = screen.getByLabelText("Password:");
+  const submitButtonEl = screen.getByRole("submit-button");
+
+  await user.type(emailInputEl, "test@email.com");
+  await user.type(passwordInputEl, "Hello!1aaaaaa");
+  await user.click(submitButtonEl);
+
+  screen.getByText("Password must be between 8 and 12 characters long")
 });
