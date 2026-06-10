@@ -5,13 +5,50 @@ import { signup } from "../../services/authentication";
 export function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [username, setUsername] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [bio, setBio] = useState("");
   const navigate = useNavigate();
 
+  function validatePassword(password) {
+    console.log("validating:", password);
+    const pattern =
+      /(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[0-9])/;
+    if (!pattern.test(password)) {
+      setError(
+        "Password must contain at least 1 capital letter, a number and a special character!",
+      );
+      return false;
+    } else if (password.length < 8 || password.length > 12) {
+      setError("Password must be between 8 and 12 characters long");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function matchPasswords(password, confirmPassword) {
+    if (password === confirmPassword) {
+      return true;
+    }
+    setError("Passwords don't match");
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+    if (
+      validatePassword(password) &&
+      matchPasswords(password, confirmPassword)
+    ) {
+      try {
+        await signup(email, password);
+        navigate("/login");
+      } catch (err) {
+        console.error(err);
+        navigate("/signup");
+      }
     try {
       await signup(email, password, username, profilePic, bio);
       navigate("/login");
@@ -29,6 +66,8 @@ export function SignupPage() {
     setPassword(event.target.value);
   }
 
+    function handleConfirmPasswordChange(event) {
+    setConfirmPassword(event.target.value);
   function handleUsernameChange(event) {
     setUsername(event.target.value);
   }
@@ -61,6 +100,14 @@ export function SignupPage() {
           value={password}
           onChange={handlePasswordChange}
         />
+        <label htmlFor="confirm-password"> Confirm Password:</label>
+        <input
+          placeholder="Confirm Password"
+          id="confirm-password"
+          type="password"
+          value={confirmPassword}
+          onChange={handleConfirmPasswordChange}
+        />
         <br></br>
         <br></br>
         <label htmlFor="username">Username: </label>
@@ -91,6 +138,7 @@ export function SignupPage() {
         <br></br>
         <input role="submit-button" id="submit" type="submit" value="Submit" />
       </form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </>
   );
 }
