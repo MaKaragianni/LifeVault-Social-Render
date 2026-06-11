@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
 import LogoutButton from "../../components/LogoutButton";
@@ -10,6 +10,7 @@ function getUserIdFromToken() {
 
 export function ProfilePage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const userId = id || getUserIdFromToken();
 
     const [user, setUser] = useState(null);
@@ -19,6 +20,7 @@ export function ProfilePage() {
     useEffect(() => {
         if (!userId) {
             setLoading(false);
+            navigate("/login");
             return;
         }
 
@@ -34,7 +36,7 @@ export function ProfilePage() {
                 setUser(null);
             })
             .finally(() => setLoading(false));
-    }, [userId]);
+    }, [userId, navigate]);
 
     if (loading) return <p>Loading profile...</p>;
     if (!user) return <p>User not found.</p>;

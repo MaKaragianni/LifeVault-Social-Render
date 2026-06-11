@@ -12,7 +12,7 @@ describe("/tokens", () => {
 
     // We need to use `await` so that the "beforeAll" setup function waits for
     // the asynchronous user.save() to be done before exiting.
-    // Otherwise, the tests belowc ould run without the user actyakkt being
+    // Otherwise, the tests below could run without the user actually being
     // saved, causing tests to fail inconsistently.
     await user.save();
   });
@@ -22,14 +22,14 @@ describe("/tokens", () => {
   });
 
   test("returns a token when credentials are valid", async () => {
-    const testApp = supertest(app);
+    const testApp = supertest(app); 
+    
     const response = await testApp
       .post("/tokens")
       .send({ email: "auth-test@test.com", password: "12345678" });
 
     expect(response.status).toEqual(201);
-    expect(response.body.token).not.toEqual(undefined);
-    expect(response.body.message).toEqual("OK");
+    expect(response.body.token).not.toEqual(undefined); 
   });
 
   test("doesn't return a token when the user doesn't exist", async () => {

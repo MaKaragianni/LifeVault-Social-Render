@@ -28,10 +28,11 @@ export async function login(email, password) {
   }
 }
 
-export async function signup(email, password, username, profilePic, bio) {
+export async function signup(email, password, confirmPassword, username, profilePic, bio) {
   const payload = {
     email,
     password,
+    confirmPassword,
     username,
     profilePic,
     bio

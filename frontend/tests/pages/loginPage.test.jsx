@@ -4,20 +4,29 @@ import { vi } from "vitest";
 
 import { useNavigate } from "react-router-dom";
 import { login } from "../../src/services/authentication";
-
 import { LoginPage } from "../../src/pages/Login/LoginPage";
+
+// Fallback storage object in case the environment lacks it
+if (typeof window !== "undefined" && !window.localStorage) {
+  const mockStorage = {};
+  window.localStorage = {
+    getItem: (key) => mockStorage[key] || null,
+    setItem: (key, val) => { mockStorage[key] = String(val); },
+    removeItem: (key) => { delete mockStorage[key]; },
+    clear: () => { for (let key in mockStorage) delete mockStorage[key]; }
+  };
+}
+
+// Mocking the authentication service using a self-contained vi.fn()
+vi.mock("../../src/services/authentication", () => {
+  return { login: vi.fn() };
+});
 
 // Mocking React Router's useNavigate function
 vi.mock("react-router-dom", () => {
   const navigateMock = vi.fn();
-  const useNavigateMock = () => navigateMock; // Create a mock function for useNavigate
+  const useNavigateMock = () => navigateMock;
   return { useNavigate: useNavigateMock };
-});
-
-// Mocking the login service
-vi.mock("../../src/services/authentication", () => {
-  const loginMock = vi.fn();
-  return { login: loginMock };
 });
 
 // Reusable function for filling out login form
@@ -36,9 +45,11 @@ async function completeLoginForm() {
 describe("Login Page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    window.localStorage.clear();
   });
 
   test("allows a user to login", async () => {
+    login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
     render(<LoginPage />);
 
     await completeLoginForm();
@@ -49,7 +60,7 @@ describe("Login Page", () => {
   test("navigates to /posts on successful login", async () => {
     render(<LoginPage />);
 
-    login.mockResolvedValue("secrettoken123");
+    login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
     const navigateMock = useNavigate();
 
     await completeLoginForm();
