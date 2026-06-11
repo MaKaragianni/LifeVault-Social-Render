@@ -43,18 +43,12 @@ export function SignupPage() {
       matchPasswords(password, confirmPassword)
     ) {
       try {
-        await signup(email, password);
+        await signup(email, password, username, profilePic, bio);
         navigate("/login");
       } catch (err) {
         console.error(err);
         navigate("/signup");
       }
-    try {
-      await signup(email, password, username, profilePic, bio);
-      navigate("/login");
-    } catch (err) {
-      console.error(err);
-      navigate("/signup");
     }
   }
 
@@ -66,8 +60,10 @@ export function SignupPage() {
     setPassword(event.target.value);
   }
 
-    function handleConfirmPasswordChange(event) {
+  function handleConfirmPasswordChange(event) {
     setConfirmPassword(event.target.value);
+  }
+
   function handleUsernameChange(event) {
     setUsername(event.target.value);
   }
@@ -129,11 +125,7 @@ export function SignupPage() {
         <br></br>
         <br></br>
         <label htmlFor="bio">Bio: </label>
-        <input
-          id="bio"
-          value={bio}
-          onChange={handleBioChange}
-        />
+        <input id="bio" value={bio} onChange={handleBioChange} />
         <br></br>
         <br></br>
         <input role="submit-button" id="submit" type="submit" value="Submit" />
