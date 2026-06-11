@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Post = require("../models/post");
 
 function create(req, res) {
   const email = req.body.email;
@@ -21,8 +22,13 @@ function create(req, res) {
 }
 
 function getProfile(req, res) {
-  User.findById(req.params.id)
-    .then((user) => {
+  Promise.all([
+    User.findById(req.params.id),
+    Post.find({ user: req.params.id })
+      .populate("user")
+      .sort({ createdAt: -1 }),
+  ])
+    .then(([user, posts]) => {
       if (!user) {
         return res.status(404).json({
           message: "User not found",
@@ -31,6 +37,7 @@ function getProfile(req, res) {
 
       res.status(200).json({
         user,
+        posts,
       });
     })
     .catch((err) => {

@@ -34,21 +34,45 @@ export function SignupPage() {
       return true;
     }
     setError("Passwords don't match");
+      return false;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     if (
       validatePassword(password) &&
       matchPasswords(password, confirmPassword)
     ) {
       try {
+
         await signup(email, password, confirmPassword, username, profilePic, bio);
         navigate("/login");
       } catch (err) {
         console.error(err);
         navigate("/signup");
       }
+    }
+  }
+
+  async function handleProfilePicChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      setProfilePic(data.imageUrl);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setError("Image upload failed");
     }
   }
 
@@ -66,10 +90,6 @@ export function SignupPage() {
 
   function handleUsernameChange(event) {
     setUsername(event.target.value);
-  }
-
-  function handleProfilePicChange(event) {
-    setProfilePic(event.target.value);
   }
 
   function handleBioChange(event) {
@@ -96,9 +116,10 @@ export function SignupPage() {
           value={password}
           onChange={handlePasswordChange}
         />
-        <label htmlFor="confirm-password"> Confirm Password:</label>
+        <br></br>
+        <br></br>
+        <label htmlFor="confirm-password"> Confirm Password: </label>
         <input
-          placeholder="Confirm Password"
           id="confirm-password"
           type="password"
           value={confirmPassword}
@@ -119,7 +140,7 @@ export function SignupPage() {
         <input
           id="profilePic"
           type="file"
-          value={profilePic}
+          accept="image/*"
           onChange={handleProfilePicChange}
         />
         <br></br>

@@ -26,6 +26,10 @@ const router = createBrowserRouter([
     element: <FeedPage />,
   },
   {
+    path: "/profile",
+    element: <ProfilePage />,
+  },
+  {
     path: "/profile/:id",
     element: <ProfilePage />,
   },
