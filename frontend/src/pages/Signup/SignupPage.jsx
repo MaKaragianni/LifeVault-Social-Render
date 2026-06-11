@@ -43,7 +43,7 @@ export function SignupPage() {
       matchPasswords(password, confirmPassword)
     ) {
       try {
-        await signup(email, password, username, profilePic, bio);
+        await signup(email, password, confirmPassword, username, profilePic, bio);
         navigate("/login");
       } catch (err) {
         console.error(err);
