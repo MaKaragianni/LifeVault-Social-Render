@@ -1,11 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require("path");
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
 const authenticationRouter = require("./routes/authentication");
 const tokenChecker = require("./middleware/tokenChecker");
+const uploadRouter = require("./routes/upload");
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(bodyParser.json());
 app.use("/users", usersRouter);
 app.use("/posts", tokenChecker, postsRouter);
 app.use("/tokens", authenticationRouter);
+app.use("/upload", uploadRouter);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // 404 Handler
 app.use((_req, res) => {

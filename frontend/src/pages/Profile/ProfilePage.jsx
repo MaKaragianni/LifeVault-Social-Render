@@ -1,28 +1,40 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getUser } from "../../services/users";
-import Post from "../../components/post";
+import Post from "../../components/Post";
 import LogoutButton from "../../components/LogoutButton";
+
+function getUserIdFromToken() {
+    return localStorage.getItem("userId");
+}
 
 export function ProfilePage() {
     const { id } = useParams();
+    const userId = id || getUserIdFromToken();
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!id) return;
+        if (!userId) {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
 
-        getUser(id)
+        getUser(userId)
             .then((userData) => {
                 setUser(userData.user);
-                setPosts(userData.posts || []);
+                setPosts(userData.posts);
             })
-            .catch(console.error)
+            .catch((err) => {
+                console.error(err);
+                setUser(null);
+            })
             .finally(() => setLoading(false));
-}, [id]);
+    }, [userId]);
 
     if (loading) return <p>Loading profile...</p>;
     if (!user) return <p>User not found.</p>;
@@ -31,9 +43,7 @@ export function ProfilePage() {
         <>
             <h2>Profile</h2>
 
-            {user.profilePic && (
-                <img src={user.profilePic} alt="Profile" width="200" />
-            )}
+            <img src={user.profilePic} alt="Profile" width="200" />
 
             <div>
                 <p>Username: {user.username}</p>
