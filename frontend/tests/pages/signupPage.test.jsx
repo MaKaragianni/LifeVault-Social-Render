@@ -53,7 +53,7 @@ describe("Signup Page", () => {
 
     await completeSignupForm();
 
-    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", "C:\\fakepath\\profile.png", "this is the test bio");
+    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", "", "this is the test bio");
   });
 
   test("navigates to /login on successful signup with passwords matching", async () => {

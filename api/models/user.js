@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// confirmPassword is left out here, so that it doesn't save in MongoDB
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },

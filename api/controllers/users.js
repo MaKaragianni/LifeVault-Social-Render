@@ -4,10 +4,17 @@ const Post = require("../models/post");
 function create(req, res) {
   const email = req.body.email;
   const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
   const username = req.body.username || "";
   const profilePic = req.body.profilePic || "";
   const bio = req.body.bio || "";
 
+  // Enforcing validation of matching passwords before touching Mongoose
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: "Passwords do not match" });
+  }
+
+  // confirmPassword is left out here, so that it doesn't save in MongoDB
   const user = new User({ email, password, username, profilePic, bio });
   user
     .save()

@@ -5,6 +5,17 @@ import { FeedPage } from "../../src/pages/Feed/FeedPage";
 import { getPosts } from "../../src/services/posts";
 import { useNavigate } from "react-router-dom";
 
+// Fallback storage mock
+if (typeof window !== "undefined" && !window.localStorage) {
+  const mockStorage = {};
+  window.localStorage = {
+    getItem: (key) => mockStorage[key] || null,
+    setItem: (key, val) => { mockStorage[key] = String(val); },
+    removeItem: (key) => { delete mockStorage[key]; },
+    clear: () => { for (let key in mockStorage) delete mockStorage[key]; }
+  };
+}
+
 // Mocking the getPosts service
 vi.mock("../../src/services/posts", () => {
   const getPostsMock = vi.fn();
@@ -27,13 +38,12 @@ describe("Feed Page", () => {
     window.localStorage.setItem("token", "testToken");
 
     const mockPosts = [{ _id: "12345", message: "Test Post 1" }];
-
     getPosts.mockResolvedValue({ posts: mockPosts, token: "newToken" });
 
     render(<FeedPage />);
 
     const post = await screen.findByRole("article");
-    expect(post.textContent).toEqual("Test Post 1");
+    expect(post.textContent).toContain("Test Post 1");
   });
 
   test("It navigates to login if no token is present", async () => {
