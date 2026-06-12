@@ -1,20 +1,20 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export async function createPost(token, message) {
-  const response = {
+  const response = await fetch (`${BACKEND_URL}/posts`, {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
-        Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  };
-
-  const response = await fetch(`${BACKEND_URL}/posts`, requestOptions);
-
-  if (response.status !== 200) {
-    throw new Error("Unable to fetch posts");
-  }
+    body: JSON.stringify({ message, }),
+  });
 
   const data = await response.json();
+
+  if (response.status !== 201) {
+    throw new Error("data.message");
+  }
+
   return data;
 }
