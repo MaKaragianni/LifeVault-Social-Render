@@ -56,9 +56,32 @@ function getProfile(req, res) {
     });
 }
 
+async function searchUsers(req, res) {
+  try {
+    const user = await User.find({ username: req.query.username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+}
+
+async function addFriend(req, res) {
+  const friend = await User.findById(req.params.id);
+  const user = await User.findById(req.user_id);
+  user.friends.push(friend._id)
+  await user.save();
+  return res.status(200).json({ message: "Friend added" })
+}
+
 const UsersController = {
   create,
   getProfile,
+  searchUsers,
+  addFriend,
 };
 
 module.exports = UsersController;
