@@ -8,6 +8,7 @@ const postsRouter = require("./routes/posts");
 const authenticationRouter = require("./routes/authentication");
 const tokenChecker = require("./middleware/tokenChecker");
 const uploadRouter = require("./routes/upload");
+const friendsRouter = require("./routes/friends");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/posts", tokenChecker, postsRouter);
 app.use("/tokens", authenticationRouter);
 app.use("/upload", uploadRouter);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/friends", tokenChecker, friendsRouter);
 
 // 404 Handler
 app.use((_req, res) => {

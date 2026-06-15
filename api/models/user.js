@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, default: "", unique: true },
   profilePic: { type: String, default: "" },
   bio: { type: String, default: "" },
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
 });
 
 const User = mongoose.model("User", UserSchema);
