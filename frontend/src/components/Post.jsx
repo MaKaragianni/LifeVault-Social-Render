@@ -22,7 +22,7 @@ function Post({ post }) {
         }}
       >
         <img
-          src={post.user.profilePic}
+          src={post.user?.profilePic || ""}
           alt=""
           width="40"
           height="40"
@@ -32,7 +32,7 @@ function Post({ post }) {
           }}
         />
       
-        <strong>{post.user.username}</strong>
+        <strong>{post.user?.username || ""}</strong>
       </div>
       
       <p>{post.message}</p>

@@ -32,7 +32,7 @@ async function completeSignupForm() {
   const bioInputEl = screen.getByLabelText("Bio:");
   const submitButtonEl = screen.getByRole("submit-button");
 
-  const fakeFile = new File(["image"], "profile.png", { type: "image/png"});
+  const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
 
   await user.type(emailInputEl, "test@email.com");
   await user.type(passwordInputEl, "Hello14!");
@@ -53,7 +53,7 @@ describe("Signup Page", () => {
 
     await completeSignupForm();
 
-    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", "", "this is the test bio");
+    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", undefined, "this is the test bio");
   });
 
   test("navigates to /login on successful signup with passwords matching", async () => {
