@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import LikeButton from "./likeButton";
-import { likePost } from "../services/posts";
 import { useState } from "react";
 
 function Post({ post: initialPost }) {

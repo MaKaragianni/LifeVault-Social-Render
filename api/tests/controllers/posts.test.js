@@ -8,6 +8,7 @@ const User = require("../../models/user");
 require("../mongodb_helper");
 
 const secret = process.env.JWT_SECRET;
+const mongoose = require("mongoose");
 
 function createToken(userId) {
   return JWT.sign(
@@ -188,6 +189,48 @@ describe("/posts", () => {
       const response = await request(app).get("/posts");
 
       expect(response.body.token).toEqual(undefined);
+    });
+  });
+
+  describe("POST /posts/:id/like", () => {
+    test("a user can like a post", async () => {
+      const post = await Post.create({
+        message: "Test post",
+        user: user._id,
+        likes: [],
+      });
+
+      const response = await request(app)
+        .post(`/posts/${post._id}/like`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(200);
+      expect(response.body.likes.length).toEqual(1);
+    });
+
+    test("a user can unlike a post", async () => {
+      const post = await Post.create({
+        message: "Test post for unlikes",
+        user: user._id,
+        likes: [user._id],
+      });
+
+      const response = await request(app)
+        .post(`/posts/${post._id}/like`)
+        .set("Authorization", `Bearer ${token}`); 
+
+      expect(response.status).toEqual(200);
+      expect(response.body.likes.length).toEqual(0);
+    });
+
+    test("returns 404 if post doesn't exist", async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .post(`/posts/${fakeId}/like`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(404);
     });
   });
 });

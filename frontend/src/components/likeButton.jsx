@@ -36,7 +36,7 @@ function LikeButton({ post, onUpdate }) {
         {likedByUser ? "💚" : "♡"}
 
         {" "}
-        {post.likes.length}
+        {post.likes?.length|| 0}
     </button>
   );
 
