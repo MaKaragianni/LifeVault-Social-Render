@@ -45,7 +45,7 @@ export function SignupPage() {
       matchPasswords(password, confirmPassword)
     ) {
       try {
-
+        console.log(profilePic)
         await signup(email, password, confirmPassword, username, profilePic, bio);
         navigate("/login");
       } catch (err) {
@@ -69,6 +69,7 @@ export function SignupPage() {
       });
 
       const data = await res.json();
+      console.log(data)
       setProfilePic(data.imageUrl);
     } catch (err) {
       console.error("Upload failed:", err);
