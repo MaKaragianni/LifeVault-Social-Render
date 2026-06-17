@@ -1,5 +1,6 @@
 const Post = require("../models/post");
 const { generateToken } = require("../lib/token");
+const User = require("../models/user");
 
 async function getAllPosts(req, res) {
   try {
@@ -49,9 +50,38 @@ async function createPost(req, res) {
   }
 }
 
+async function toggleLike(req, res) {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json ({message: "Post not found"});
+    }
+
+    const alreadyLiked = post.likes.some(
+      (likeID) => likeID.toString() === req.user_id
+    );
+
+    if (alreadyLiked) {
+      post.likes.pull(req.user_id);
+    } else {
+      post.likes.push(req.user_id);
+    }
+
+    await post.save();
+
+    return res.status(200).json({ likes: post.likes });
+
+    } catch (err) {
+    console.error(err);
+    res.status(500).json({message: "Something went wrong"});
+  }
+};
+
 const PostsController = {
   getAllPosts: getAllPosts,
   createPost: createPost,
+  togglelike: toggleLike,
 };
 
 module.exports = PostsController;
