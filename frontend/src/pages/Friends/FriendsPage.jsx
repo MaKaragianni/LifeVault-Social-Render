@@ -33,11 +33,11 @@ export function FriendsPage() {
 
   return (
     <>
-      <h2>Friends:</h2>
+      <h2>Search Users:</h2>
       <SearchBar />
       <br></br>
       <br></br>
-      <h2>Your Friends:</h2>
+      <h2>Following:</h2>
       <div className="friends" role="friends">
         {friends.map((friend) => (
           <User friend={friend} key={friend._id} />
