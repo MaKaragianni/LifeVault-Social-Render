@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
 import LogoutButton from "../../components/LogoutButton";
-import AddFriendButton from "../../components/FollowButton";
+import FollowButton from "../../components/FollowButton";
 
 function getUserIdFromToken() {
   return localStorage.getItem("userId");
@@ -51,7 +51,7 @@ export function ProfilePage() {
       <div>
         <p>Username: {user.username}</p>
         <p>Bio: {user.bio}</p>
-        <AddFriendButton />
+        <FollowButton />
         <br></br>
         <br></br>
       </div>

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getAllFriends } from "../services/following";
 
-function AddFriendButton() {
+function FollowButton() {
   const { id } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -36,4 +36,4 @@ function AddFriendButton() {
   );
 }
 
-export default AddFriendButton;
+export default FollowButton;
