@@ -69,19 +69,50 @@ async function searchUsers(req, res) {
   }
 }
 
-async function addFriend(req, res) {
+// async function addFriend(req, res) {
+//   const friend = await User.findById(req.params.id);
+//   const user = await User.findById(req.user_id);
+//   user.friends.push(friend._id)
+//   await user.save();
+//   return res.status(200).json({ message: "Friend added" })
+// }
+
+
+async function handleFollow(req, res) {
   const friend = await User.findById(req.params.id);
   const user = await User.findById(req.user_id);
-  user.friends.push(friend._id)
-  await user.save();
-  return res.status(200).json({ message: "Friend added" })
+  try {
+    if (user.friends.includes(friend._id)) {
+      await User.updateOne(
+        {_id: user._id},
+        {$pull: {friends: friend._id}
+      })
+      return res.status(200).json({
+        message: "Unfollowed"
+      })
+  } else {
+      await User.updateOne(
+        {_id: user._id},
+        {$addToSet: {friends: friend._id}
+      })
+      return res.status(200).json({
+        message: "Followed"
+      })
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
 }
 
 const UsersController = {
   create,
   getProfile,
   searchUsers,
-  addFriend,
+  // addFriend,
+  handleFollow,
 };
 
 module.exports = UsersController;
