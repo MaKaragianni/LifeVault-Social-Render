@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-
+import { MemoryRouter } from "react-router-dom";
 import { FeedPage } from "../../src/pages/Feed/FeedPage";
 import { getPosts } from "../../src/services/posts";
 import { useNavigate } from "react-router-dom";
@@ -12,13 +12,17 @@ vi.mock("../../src/services/posts", () => {
 });
 
 // Mocking React Router's useNavigate function
-vi.mock("react-router-dom", () => {
-  return { useNavigate: vi.fn(() => vi.fn()) };
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: vi.fn(() => vi.fn()),
+  };
 });
 
 describe("Feed Page - Post Form", () => {
-    // Mocking localStorage manually before running tests
-    beforeEach(() => {
+  // Mocking localStorage manually before running tests
+  beforeEach(() => {
     let store = {};
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -29,7 +33,7 @@ describe("Feed Page - Post Form", () => {
       },
       writable: true
     });
-    
+
     // Clear it to keep tests isolated
     window.localStorage.clear();
   });
@@ -42,7 +46,11 @@ describe("Feed Page - Post Form", () => {
         token: "newToken",
     });
 
-    render(<FeedPage />);
+    render(
+      <MemoryRouter>
+        <FeedPage />
+      </MemoryRouter>
+    );
 
     const textarea = await screen.findByPlaceholderText("What's on your mind?");
     const button = await screen.findByRole("button", { name: "Post" });

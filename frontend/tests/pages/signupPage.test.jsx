@@ -106,9 +106,9 @@ test("When user types password with no capital letter, no special char or no num
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -130,9 +130,9 @@ test("When user types password with no capital letter, error occurs.", async () 
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -154,9 +154,9 @@ test("When user types password with no special char, error occurs.", async () =>
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -178,9 +178,9 @@ test("When user types password with no number, error occurs.", async () => {
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -202,9 +202,9 @@ test("When user types a password less than 8 characters long an error occurs.", 
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -224,9 +224,9 @@ test("When user types a password more than 12 characters long an error occurs.",
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");
@@ -246,9 +246,9 @@ test("When user inputs a valid password but confirm password doesn't match, erro
 
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
   const submitButtonEl = screen.getByRole("submit-button");
 
   await user.type(emailInputEl, "test@email.com");

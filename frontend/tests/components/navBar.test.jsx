@@ -12,7 +12,7 @@ describe("Navbar Component", () => {
         );
 
         const logo = screen.getByAltText("logo");
-        expect(logo).toBeInTheDocument();
+        expect(logo).toBeTruthy();
     });
 
     it("contains links to Feed, Profile and Following pages", () => {
@@ -27,13 +27,13 @@ describe("Navbar Component", () => {
             const profileLink = screen.getByRole("link", { name: /profile/i });
             const followingLink = screen.getByRole("link", { name: /following/i });
 
-            expect(feedLink).toBeInTheDocument();
-            expect(profileLink).toBeInTheDocument();
-            expect(followingLink).toBeInTheDocument();
+            expect(feedLink).toBeTruthy();
+            expect(profileLink).toBeTruthy();
+            expect(followingLink).toBeTruthy();
 
             //Verifying the links navigate to the right URLs
-            expect(feedLink).toHaveAttribute("href", "/posts");
-            expect(profileLink).toHaveAttribute("href", "/profile");
-            expect(followingLink).toHaveAttribute("href", "/following");   
+            expect(feedLink.getAttribute("href")).toBe("/posts");
+            expect(profileLink.getAttribute("href")).toBe("/profile");
+            expect(followingLink.getAttribute("href")).toBe("/following");   
     });
 });

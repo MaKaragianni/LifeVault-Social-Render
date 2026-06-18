@@ -8,8 +8,10 @@ const mockNavigate = vi.fn();
 let mockParamsId = "60c72b2f9b1d8b2bad6e1a2c";
 
 // Mocking React Router dependencies
-vi.mock("react-router-dom", () => {
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
+    ...actual,
     useNavigate: () => mockNavigate,
     useParams: () => ({ id: mockParamsId }),
   };
@@ -19,6 +21,13 @@ vi.mock("react-router-dom", () => {
 vi.mock("../../src/services/users", () => {
   return { 
     getUser: vi.fn() 
+  };
+});
+
+// Mocking the friends service to eliminate unhandled promise rejections
+vi.mock("../../src/services/friends", () => {
+  return {
+    getAllFriends: vi.fn().mockResolvedValue([]),
   };
 });
 

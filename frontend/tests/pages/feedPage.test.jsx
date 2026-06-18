@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-
+import { MemoryRouter } from "react-router-dom";
 import { FeedPage } from "../../src/pages/Feed/FeedPage";
 import { getPosts } from "../../src/services/posts";
 import { useNavigate } from "react-router-dom";
@@ -23,10 +23,13 @@ vi.mock("../../src/services/posts", () => {
 });
 
 // Mocking React Router's useNavigate function
-vi.mock("react-router-dom", () => {
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   const navigateMock = vi.fn();
-  const useNavigateMock = () => navigateMock; // Create a mock function for useNavigate
-  return { useNavigate: useNavigateMock };
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
 });
 
 describe("Feed Page", () => {
@@ -40,14 +43,24 @@ describe("Feed Page", () => {
     const mockPosts = [{ _id: "12345", message: "Test Post 1", likes: [] }];
     getPosts.mockResolvedValue({ posts: mockPosts, token: "newToken" });
 
-    render(<FeedPage />);
-
+    render(
+      <MemoryRouter>
+        <FeedPage />
+      </MemoryRouter>
+  );
+  
     const post = await screen.findByRole("article");
     expect(post.textContent).toContain("Test Post 1");
   });
 
   test("It navigates to login if no token is present", async () => {
-    render(<FeedPage />);
+
+    render(
+      <MemoryRouter>
+        <FeedPage />
+      </MemoryRouter>
+  );
+
     const navigateMock = useNavigate();
     expect(navigateMock).toHaveBeenCalledWith("/login");
   });
