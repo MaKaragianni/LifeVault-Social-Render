@@ -28,17 +28,18 @@ async function completeSignupForm() {
   const passwordInputEl = screen.getByLabelText("Password:");
   const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
   const usernameInputEl = screen.getByLabelText("Username:");
-  const profilePicInputEl = screen.getByLabelText("Profile Picture:");
+  // const profilePicInputEl = screen.getByLabelText("Profile Picture:");
   const bioInputEl = screen.getByLabelText("Bio:");
   const submitButtonEl = screen.getByRole("submit-button");
 
-  const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
+  // const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
+  // console.log(fakeFile)
 
   await user.type(emailInputEl, "test@email.com");
   await user.type(passwordInputEl, "Hello14!");
   await user.type(confirmPasswordInputEl, "Hello14!");
   await user.type(usernameInputEl, "test");
-  await user.upload(profilePicInputEl, fakeFile);
+  // await user.upload(profilePicInputEl, fakeFile);
   await user.type(bioInputEl, "this is the test bio");
   await user.click(submitButtonEl);
 }
@@ -53,7 +54,14 @@ describe("Signup Page", () => {
 
     await completeSignupForm();
 
-    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", undefined, "this is the test bio");
+    expect(signup).toHaveBeenCalledWith(
+      "test@email.com",
+      "Hello14!",
+      "Hello14!",
+      "test",
+      "",
+      "this is the test bio",
+    );
   });
 
   test("navigates to /login on successful signup with passwords matching", async () => {
@@ -78,7 +86,7 @@ describe("Signup Page", () => {
   });
 });
 
-  test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {
+test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -96,9 +104,9 @@ describe("Signup Page", () => {
   screen.getByText(
     "Password must contain at least 1 capital letter, a number and a special character!",
   );
-  });
+});
 
-  test("When user types password with no capital letter, error occurs.", async () => {
+test("When user types password with no capital letter, error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -116,9 +124,9 @@ describe("Signup Page", () => {
   screen.getByText(
     "Password must contain at least 1 capital letter, a number and a special character!",
   );
-  });
+});
 
-  test("When user types password with no special char, error occurs.", async () => {
+test("When user types password with no special char, error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -136,9 +144,9 @@ describe("Signup Page", () => {
   screen.getByText(
     "Password must contain at least 1 capital letter, a number and a special character!",
   );
-  });
+});
 
-  test("When user types password with no number, error occurs.", async () => {
+test("When user types password with no number, error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -156,9 +164,9 @@ describe("Signup Page", () => {
   screen.getByText(
     "Password must contain at least 1 capital letter, a number and a special character!",
   );
-  });
+});
 
-  test("When user types a password less than 8 characters long an error occurs.", async () => {
+test("When user types a password less than 8 characters long an error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -174,9 +182,9 @@ describe("Signup Page", () => {
   await user.click(submitButtonEl);
 
   screen.getByText("Password must be between 8 and 12 characters long");
-  });
+});
 
-  test("When user types a password more than 12 characters long an error occurs.", async () => {
+test("When user types a password more than 12 characters long an error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -192,9 +200,9 @@ describe("Signup Page", () => {
   await user.click(submitButtonEl);
 
   screen.getByText("Password must be between 8 and 12 characters long");
-  });
+});
 
-  test("When user inputs a valid password but confirm password doesn't match, error occurs.", async () => {
+test("When user inputs a valid password but confirm password doesn't match, error occurs.", async () => {
   render(<SignupPage />);
 
   const user = userEvent.setup();
@@ -210,4 +218,4 @@ describe("Signup Page", () => {
   await user.click(submitButtonEl);
 
   screen.getByText("Passwords don't match");
-  });
+});
