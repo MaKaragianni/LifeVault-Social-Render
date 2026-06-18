@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import LikeButton from "./likeButton";
+import { useState } from "react";
 
-function Post({ post }) {
+function Post({ post: initialPost }) {
   const navigate = useNavigate();
+  const [post, setPost] = useState (initialPost);
 
   return (
     <article
@@ -36,7 +39,17 @@ function Post({ post }) {
       </div>
       
       <p>{post.message}</p>
-      
+
+      <LikeButton
+        post={post}
+        onUpdate={(updatedLikes) => 
+          setPost({
+            ...post,
+            likes: updatedLikes,
+          })
+        }
+      />
+
       {post.image && (
         <img
           src={post.image}

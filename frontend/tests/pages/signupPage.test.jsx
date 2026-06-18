@@ -84,7 +84,7 @@ describe("Signup Page", () => {
 
     expect(navigateMock).toHaveBeenCalledWith("/signup");
   });
-});
+
 
 test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {
   render(<SignupPage />);
@@ -218,4 +218,5 @@ test("When user inputs a valid password but confirm password doesn't match, erro
   await user.click(submitButtonEl);
 
   screen.getByText("Passwords don't match");
+  });
 });

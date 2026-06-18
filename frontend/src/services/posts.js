@@ -18,3 +18,21 @@ export async function getPosts(token) {
   const data = await response.json();
   return data;
 }
+
+export async function likePost(token, post) {
+  const requestOptions = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const response = await fetch(`${BACKEND_URL}/posts/${post}/like`, requestOptions);
+
+  if (response.status !== 200) {
+    throw new Error("Unable to like post");
+  }
+
+  const data = await response.json();
+  return data;
+}
