@@ -59,7 +59,7 @@ function getProfile(req, res) {
 async function searchUsers(req, res) {
   try {
     const user = await User.find({ username: req.query.username });
-    if (!user) {
+    if (user.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
     return res.status(200).json(user);
@@ -72,6 +72,11 @@ async function searchUsers(req, res) {
 async function handleFollow(req, res) {
   const friend = await User.findById(req.params.id);
   const user = await User.findById(req.user_id);
+
+  if (user._id.toString() === friend._id.toString()) {
+    return res.status(400).json({ message: "You cannot follow yourself" });
+  }
+
   try {
     if (user.friends.includes(friend._id)) {
       await User.updateOne(

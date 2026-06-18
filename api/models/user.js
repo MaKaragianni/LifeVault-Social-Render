@@ -7,7 +7,16 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, default: "", unique: true },
   profilePic: { type: String, default: "" },
   bio: { type: String, default: "" },
-  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    validate: {
+      validator: function(friendId) {
+        return !friendId.equals(this._id);
+      },
+      message: "You cannot follow yourself"
+    }
+  }],
 });
 
 const User = mongoose.model("User", UserSchema);

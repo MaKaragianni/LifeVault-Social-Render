@@ -129,4 +129,99 @@ describe("User model", () => {
     expect(savedUser[0].profilePic).toEqual("");
     expect(savedUser[0].bio).toEqual("");
   });
+
+  it("can add a friend to the friends array", async () => {
+    const user1 = await User.create({
+      email: "user1@test.com",
+      password: "Password1!",
+      username: "User1",
+    });
+
+    const user2 = await User.create({
+      email: "user2@test.com",
+      password: "Password2!",
+      username: "User2",
+    });
+
+    user1.friends.addToSet(user2._id);
+    await user1.save();
+
+    const savedUser = await User.findById(user1._id);
+    expect(savedUser.friends).toContainEqual(user2._id);
+  });
+
+  it("can populate the friends array with user data", async () => {
+    const user1 = await User.create({
+      email: "user1@test.com",
+      password: "Password1!",
+      username: "User1",
+    });
+
+    const user2 = await User.create({
+      email: "user2@test.com",
+      password: "Password2!",
+      username: "User2",
+    });
+
+    user1.friends.addToSet(user2._id);
+    await user1.save();
+
+    const savedUser = await User.findById(user1._id).populate("friends");
+    expect(savedUser.friends[0].username).toBe("User2");
+  });
+
+  it("should only be possible to add a single friend to the friends array once", async () => {
+    const user1 = await User.create({
+      email: "user1@test.com",
+      password: "Password1!",
+      username: "User1",
+    });
+
+    const user2 = await User.create({
+      email: "user2@test.com",
+      password: "Password2!",
+      username: "User2",
+    });
+
+    user1.friends.addToSet(user2._id);
+    user1.friends.addToSet(user2._id);
+    await user1.save();
+
+    const savedUser = await User.findById(user1._id);
+    expect(savedUser.friends.length).toBe(1);
+  });
+
+  it("can remove a friend from the friends array", async () => {
+    const user1 = await User.create({
+      email: "user1@test.com",
+      password: "Password1!",
+      username: "User1",
+    });
+
+    const user2 = await User.create({
+      email: "user2@test.com",
+      password: "Password2!",
+      username: "User2",
+    });
+
+    user1.friends.addToSet(user2._id);
+    await user1.save();
+
+    user1.friends.pull(user2._id);
+    await user1.save();
+
+    const savedUser = await User.findById(user1._id);
+    expect(savedUser.friends).not.toContainEqual(user2._id);
+  });
+
+  it("should not be possible for a user to add themself to their own friends array", async () => {
+    const user1 = await User.create({
+      email: "user1@test.com",
+      password: "Password1!",
+      username: "User1",
+    });
+
+    user1.friends.addToSet(user1._id);
+    await expect(user1.save()).rejects.toThrow("You cannot follow yourself");
+  });
 });

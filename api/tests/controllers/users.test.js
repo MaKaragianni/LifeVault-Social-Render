@@ -1,9 +1,29 @@
 const request = require("supertest");
+const JWT = require("jsonwebtoken");
 
 const app = require("../../app");
 const User = require("../../models/user");
 
 require("../mongodb_helper");
+
+const secret = process.env.JWT_SECRET;
+const mongoose = require("mongoose");
+
+function createToken(userId) {
+  return JWT.sign(
+    {
+      sub: userId,
+      // Backdate this token of 5 minutes
+      iat: Math.floor(Date.now() / 1000) - 5 * 60,
+      // Set the JWT token to expire in 10 minutes
+      exp: Math.floor(Date.now() / 1000) + 10 * 60,
+    },
+    secret
+  );
+}
+
+let user1, user2;
+let token;
 
 describe("/users", () => {
   beforeEach(async () => {
@@ -63,7 +83,7 @@ describe("/users", () => {
       expect(users.length).toEqual(0);
     });
   });
-});
+
 
 /* Added integration test cases for GET /users/:id to cover
 the User profile page logic.
@@ -99,3 +119,79 @@ the User profile page logic.
       expect(response.statusCode).toBe(404);
     });
   });
+
+  describe("GET /users/search", () => {
+    test("responds with 200 and user data if username exists", async () => {
+      const user1 = await User.create({
+        email: "user1@test.com",
+        password: "Password1!",
+        username: "User1",
+      });
+
+      const response = await request(app)
+        .get("/users/search")
+        .query({ username: "User1"});
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body[0].username).toEqual("User1");
+    });
+
+    test("responds with 404 if user not found", async () => {
+      const response = await request(app)
+        .get("/users/search")
+        .query({ username: "User2"});
+
+      expect(response.statusCode).toBe(404);
+      expect(response.body.message).toEqual("User not found");
+    });
+  });
+
+  describe("POST /users/:id/handlefollow", () => {
+    it("should allow a user to follow another user", async () => {
+      user1 = new User ({
+        email: "user1@test.com",
+        password: "Password1!",
+        username: "User1",
+      });
+      user2 = new User ({
+        email: "user2@test.com",
+        password: "Password2!",
+        username: "User2",
+      });
+      token = createToken(user1.id);
+      await user1.save();
+      await user2.save();
+      
+      const response = await request(app)
+        .post(`/users/${user2._id}/handlefollow`)
+        .set("Authorization", `Bearer ${token}`);
+      
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toBe("Followed");
+    });
+
+    it("should allow a user to unfollow another user", async () => {
+      user1 = new User ({
+        email: "user1@test.com",
+        password: "Password1!",
+        username: "User1",
+      });
+      user2 = new User ({
+        email: "user2@test.com",
+        password: "Password2!",
+        username: "User2",
+      });
+      token = createToken(user1.id);
+      user1.friends.addToSet(user2._id);
+      await user1.save()
+      await user2.save()
+    
+      const response = await request(app)
+        .post(`/users/${user2._id}/handlefollow`)
+        .set("Authorization", `Bearer ${token}`);
+    
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toBe("Unfollowed");
+    });
+  });
+});
