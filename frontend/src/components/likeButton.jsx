@@ -31,12 +31,24 @@ function LikeButton({ post, onUpdate }) {
             fontSize: "20px",
             border: "none",
             cursor: "pointer",
+            color: "#4C4C34",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px"
         }}
     >
-        {likedByUser ? "💚" : "♡"}
+        <span 
+            style={
+              likedByUser
+                  ? { color: "transparent", textShadow: "0 0 0 #4C4C34" }
+                  : {}
+            }
+        >   {likedByUser ? "💚" : "♡"}
+        </span> 
 
-        {" "}
-        {post.likes?.length|| 0}
+        <span style={{ fontSize: "15px"}}>
+          {post.likes?.length || 0}
+        </span>
     </button>
   );
 

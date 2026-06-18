@@ -1,17 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 import { useNavigate } from "react-router-dom";
 import { signup } from "../../src/services/authentication";
 
 import { SignupPage } from "../../src/pages/Signup/SignupPage";
 
-// Mocking React Router's useNavigate function
-vi.mock("react-router-dom", () => {
-  const navigateMock = vi.fn();
-  const useNavigateMock = () => navigateMock; // Create a mock function for useNavigate
-  return { useNavigate: useNavigateMock };
+const navigateMock = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
 });
 
 // Mocking the signup service
@@ -27,12 +31,12 @@ const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
 async function completeSignupForm(fakeFile) {
   const user = userEvent.setup();
 
-  const emailInputEl = screen.getByLabelText("Email:");
-  const passwordInputEl = screen.getByLabelText("Password:");
-  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
-  const usernameInputEl = screen.getByLabelText("Username:");
-  const profilePicInputEl = screen.getByLabelText("Profile Picture:");
-  const bioInputEl = screen.getByLabelText("Bio:");
+  const emailInputEl = screen.getByLabelText("Email");
+  const passwordInputEl = screen.getByLabelText("Password");
+  const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
+  const usernameInputEl = screen.getByLabelText("Username");
+  const profilePicInputEl = screen.getByLabelText("Profile Picture");
+  const bioInputEl = screen.getByLabelText("Bio");
   const submitButtonEl = screen.getByRole("submit-button");
 
   console.log(fakeFile)
@@ -52,7 +56,11 @@ describe("Signup Page", () => {
   });
 
   test("allows a user to signup", async () => {
-    render(<SignupPage />);
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
     await completeSignupForm(fakeFile);
 
@@ -60,7 +68,11 @@ describe("Signup Page", () => {
   });
 
   test("navigates to /login on successful signup with passwords matching", async () => {
-    render(<SignupPage />);
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
     const navigateMock = useNavigate();
 
@@ -70,7 +82,11 @@ describe("Signup Page", () => {
   });
 
   test("navigates to /signup on unsuccessful signup", async () => {
-    render(<SignupPage />);
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
     signup.mockRejectedValue(new Error("Error signing up"));
     const navigateMock = useNavigate();
@@ -82,7 +98,11 @@ describe("Signup Page", () => {
 
 
 test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -102,7 +122,11 @@ test("When user types password with no capital letter, no special char or no num
 });
 
 test("When user types password with no capital letter, error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -122,7 +146,11 @@ test("When user types password with no capital letter, error occurs.", async () 
 });
 
 test("When user types password with no special char, error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -142,7 +170,11 @@ test("When user types password with no special char, error occurs.", async () =>
 });
 
 test("When user types password with no number, error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -162,7 +194,11 @@ test("When user types password with no number, error occurs.", async () => {
 });
 
 test("When user types a password less than 8 characters long an error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -180,7 +216,11 @@ test("When user types a password less than 8 characters long an error occurs.", 
 });
 
 test("When user types a password more than 12 characters long an error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 
@@ -198,7 +238,11 @@ test("When user types a password more than 12 characters long an error occurs.",
 });
 
 test("When user inputs a valid password but confirm password doesn't match, error occurs.", async () => {
-  render(<SignupPage />);
+  render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
 
   const user = userEvent.setup();
 

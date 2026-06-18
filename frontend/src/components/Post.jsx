@@ -12,7 +12,9 @@ function Post({ post: initialPost }) {
         border: "1px solid #ccc",
         padding: "15px",
         marginBottom: "15px",
-        borderRadius: "8px"
+        borderRadius: "8px",
+        background: "#ffffff",
+        boxShadow: "0 1px 3px rgba(0, 0, 0.08)"
       }}
     >
       <div

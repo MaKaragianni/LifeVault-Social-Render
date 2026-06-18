@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllFriends } from "../../services/friends";
 import User from "../../components/User";
 import SearchBar from "../../components/SearchBar";
+import Navbar from "../../components/Navbar";
 
 export function FriendsPage() {
   const [friends, setFriends] = useState([]);
@@ -33,6 +34,9 @@ export function FriendsPage() {
 
   return (
     <>
+      <Navbar />
+      <div className="page-content">
+
       <h2>Search Users:</h2>
       <SearchBar />
       <br></br>
@@ -42,6 +46,7 @@ export function FriendsPage() {
         {friends.map((friend) => (
           <User friend={friend} key={friend._id} />
         ))}
+      </div>
       </div>
     </>
   );

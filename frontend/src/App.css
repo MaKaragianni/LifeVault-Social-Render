@@ -1,5 +1,17 @@
 #root {
-  margin: 0 auto;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
+.page-content {
+  background-color:#EBDED0;
+  min-height: calc(100vh - 90px);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-content h2 {
+  margin-top: 0;
+}
