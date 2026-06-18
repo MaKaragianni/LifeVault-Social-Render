@@ -20,26 +20,28 @@ vi.mock("../../src/services/authentication", () => {
   return { signup: signupMock };
 });
 
+const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
+
+
 // Reusable function for filling out signup form
-async function completeSignupForm() {
+async function completeSignupForm(fakeFile) {
   const user = userEvent.setup();
 
   const emailInputEl = screen.getByLabelText("Email:");
   const passwordInputEl = screen.getByLabelText("Password:");
   const confirmPasswordInputEl = screen.getByLabelText("Confirm Password:");
   const usernameInputEl = screen.getByLabelText("Username:");
-  // const profilePicInputEl = screen.getByLabelText("Profile Picture:");
+  const profilePicInputEl = screen.getByLabelText("Profile Picture:");
   const bioInputEl = screen.getByLabelText("Bio:");
   const submitButtonEl = screen.getByRole("submit-button");
 
-  // const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
-  // console.log(fakeFile)
+  console.log(fakeFile)
 
   await user.type(emailInputEl, "test@email.com");
   await user.type(passwordInputEl, "Hello14!");
   await user.type(confirmPasswordInputEl, "Hello14!");
   await user.type(usernameInputEl, "test");
-  // await user.upload(profilePicInputEl, fakeFile);
+  await user.upload(profilePicInputEl, fakeFile);
   await user.type(bioInputEl, "this is the test bio");
   await user.click(submitButtonEl);
 }
@@ -52,16 +54,9 @@ describe("Signup Page", () => {
   test("allows a user to signup", async () => {
     render(<SignupPage />);
 
-    await completeSignupForm();
+    await completeSignupForm(fakeFile);
 
-    expect(signup).toHaveBeenCalledWith(
-      "test@email.com",
-      "Hello14!",
-      "Hello14!",
-      "test",
-      "",
-      "this is the test bio",
-    );
+    expect(signup).toHaveBeenCalledWith("test@email.com", "Hello14!", "Hello14!", "test", "", "this is the test bio");
   });
 
   test("navigates to /login on successful signup with passwords matching", async () => {
@@ -69,7 +64,7 @@ describe("Signup Page", () => {
 
     const navigateMock = useNavigate();
 
-    await completeSignupForm();
+    await completeSignupForm(fakeFile);
 
     expect(navigateMock).toHaveBeenCalledWith("/login");
   });
@@ -80,7 +75,7 @@ describe("Signup Page", () => {
     signup.mockRejectedValue(new Error("Error signing up"));
     const navigateMock = useNavigate();
 
-    await completeSignupForm();
+    await completeSignupForm(fakeFile);
 
     expect(navigateMock).toHaveBeenCalledWith("/signup");
   });
