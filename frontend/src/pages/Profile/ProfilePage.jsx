@@ -51,7 +51,7 @@ export function ProfilePage() {
       <div>
         <p>Username: {user.username}</p>
         <p>Bio: {user.bio}</p>
-        <AddFriendButton isFollowing={user.isFollowing} />
+        <AddFriendButton />
         <br></br>
         <br></br>
       </div>
