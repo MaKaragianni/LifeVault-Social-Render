@@ -5,6 +5,7 @@ function LogoutButton() {
 
   function logOut() {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     navigate("/");
   }
 

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, MemoryRouter } from "react-router-dom";
 import { login } from "../../src/services/authentication";
 import { LoginPage } from "../../src/pages/Login/LoginPage";
 
@@ -23,10 +23,19 @@ vi.mock("../../src/services/authentication", () => {
 });
 
 // Mocking React Router's useNavigate function
-vi.mock("react-router-dom", () => {
-  const navigateMock = vi.fn();
-  const useNavigateMock = () => navigateMock;
-  return { useNavigate: useNavigateMock };
+// vi.mock("react-router-dom", () => {
+//   const navigateMock = vi.fn();
+//   const useNavigateMock = () => navigateMock;
+//   return { useNavigate: useNavigateMock };
+// });
+const navigateMock = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
 });
 
 // Reusable function for filling out login form
@@ -50,7 +59,11 @@ describe("Login Page", () => {
 
   test("allows a user to login", async () => {
     login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
-    render(<LoginPage />);
+    render(
+      <MemoryRouter>
+        <LoginPage/>
+      </MemoryRouter>
+    );
 
     await completeLoginForm();
 
@@ -58,10 +71,13 @@ describe("Login Page", () => {
   });
 
   test("navigates to /posts on successful login", async () => {
-    render(<LoginPage />);
-
     login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
-    const navigateMock = useNavigate();
+
+    render(
+      <MemoryRouter>
+        <LoginPage/>
+      </MemoryRouter>
+    );
 
     await completeLoginForm();
 
@@ -69,10 +85,13 @@ describe("Login Page", () => {
   });
 
   test("navigates to /login on unsuccessful login", async () => {
-    render(<LoginPage />);
-
     login.mockRejectedValue(new Error("Error logging in"));
-    const navigateMock = useNavigate();
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
 
     await completeLoginForm();
 

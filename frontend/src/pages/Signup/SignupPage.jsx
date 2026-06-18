@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signup } from "../../services/authentication";
+import logo from "../../assets/lifevault_logo_v5.png";
+
+import "./SignupPage.css";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +16,6 @@ export function SignupPage() {
   const navigate = useNavigate();
 
   function validatePassword(password) {
-    console.log("validating:", password);
     const pattern =
       /(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[0-9])/;
     if (!pattern.test(password)) {
@@ -34,7 +36,7 @@ export function SignupPage() {
       return true;
     }
     setError("Passwords don't match");
-      return false;
+    return false;
   }
 
   async function handleSubmit(event) {
@@ -45,7 +47,6 @@ export function SignupPage() {
       matchPasswords(password, confirmPassword)
     ) {
       try {
-        console.log(profilePic)
         await signup(email, password, confirmPassword, username, profilePic, bio);
         navigate("/login");
       } catch (err) {
@@ -69,7 +70,6 @@ export function SignupPage() {
       });
 
       const data = await res.json();
-      console.log(data)
       setProfilePic(data.imageUrl);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -98,61 +98,67 @@ export function SignupPage() {
   }
 
   return (
-    <>
-      <h2>Signup</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email: </label>
-        <input
-          id="email"
-          type="text"
-          value={email}
-          onChange={handleEmailChange}
-        />
-        <br></br>
-        <br></br>
-        <label htmlFor="password">Password: </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={handlePasswordChange}
-        />
-        <br></br>
-        <br></br>
-        <label htmlFor="confirm-password"> Confirm Password: </label>
-        <input
-          id="confirm-password"
-          type="password"
-          value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
-        />
-        <br></br>
-        <br></br>
-        <label htmlFor="username">Username: </label>
-        <input
-          id="username"
-          type="text"
-          value={username}
-          onChange={handleUsernameChange}
-        />
-        <br></br>
-        <br></br>
-        <label htmlFor="profilePic">Profile Picture: </label>
-        <input
-          id="profilePic"
-          type="file"
-          accept="image/*"
-          onChange={handleProfilePicChange}
-        />
-        <br></br>
-        <br></br>
-        <label htmlFor="bio">Bio: </label>
-        <input id="bio" value={bio} onChange={handleBioChange} />
-        <br></br>
-        <br></br>
-        <input role="submit-button" id="submit" type="submit" value="Submit" />
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </>
+    <div className="signup-container">
+      <div className="signup-card">
+        <img src={logo} alt="logo" className="auth-logo" />
+        <h2>Create your account</h2>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <form onSubmit={handleSubmit} className="signup-form">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="text"
+            value={email}
+            onChange={handleEmailChange}
+          />
+
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+
+          <label htmlFor="confirm-password">Confirm Password</label>
+          <input
+            id="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+          />
+
+          <label htmlFor="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={handleUsernameChange}
+          />
+
+          <label htmlFor="profilePic">Profile Picture</label>
+          <input
+            id="profilePic"
+            type="file"
+            accept="image/*"
+            onChange={handleProfilePicChange}
+          />
+
+          <label htmlFor="bio">Bio</label>
+          <input id="bio" value={bio} onChange={handleBioChange} />
+
+          <input
+            role="submit-button"
+            id="submit"
+            type="submit"
+            value="Submit"
+            className="btn btn-primary"
+          />
+        </form>
+        <p className="auth-switch">
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import { getPosts } from "../../services/posts";
 import Post from "../../components/Post";
-import LogoutButton from "../../components/LogoutButton";
 import { createPost } from "../../services/createPost";
+import Navbar from "../../components/Navbar";
 
 export function FeedPage() {
   const [posts, setPosts] = useState([]);
@@ -50,6 +50,9 @@ export function FeedPage() {
 
   return (
     <>
+      <Navbar />
+      <div className="page-content">
+
       <h2>Posts</h2>
 
       <form
@@ -58,7 +61,7 @@ export function FeedPage() {
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          maxWidth: "600px",
+          maxWidth: "800px",
           marginBottom: "20px",
         }}
       >
@@ -69,8 +72,18 @@ export function FeedPage() {
           rows="4"
           style={{
             width: "100%",
-            padding: "10px",
             resize: "vertical",
+            boxSizing: "border-box",
+            border: "1px solid #ccc",
+            padding: "15px",
+            marginBottom: "15px",
+            borderRadius: "8px",
+            background: "#ffffff",
+            boxShadow: "0 1px 3px rgba(0, 0, 0.08)",
+            fontFamily: "system-ui",
+            fontSize: "1rem",
+            outline: "none",
+            color: "#413933",
           }}
         />
 
@@ -85,6 +98,10 @@ export function FeedPage() {
             type="submit"
             style={{
             padding: "8px 16px",
+            background: "#4C4C34",
+            color: "#EBDED0",
+            fontFamily: "system-ui",
+            fontSize: "1rem",
             }}
           >
             Post
@@ -97,7 +114,7 @@ export function FeedPage() {
           <Post post={post} key={post._id} />
         ))}
       </div>
-      <LogoutButton />
+      </div>
     </>
   );
 }
