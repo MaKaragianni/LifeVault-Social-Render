@@ -35,7 +35,7 @@ const router = createBrowserRouter([
     element: <ProfilePage />,
   },
   {
-    path: "/friends",
+    path: "/following",
     element: <FriendsPage />,
   },
 ]);
