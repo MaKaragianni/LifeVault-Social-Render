@@ -40,23 +40,25 @@ export async function searchUsers(token, searchQuery) {
   return data;
 }
 
-export async function addFriend(token, friendId) {
+
+export async function handleFollow(token, friendId) {
   const requestOptions = {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
 
   const response = await fetch(
-    `${BACKEND_URL}/users/${friendId}/friends`,
+    `${BACKEND_URL}/users/${friendId}/handlefollow`,
     requestOptions,
   );
 
   if (response.status !== 200) {
-    console.error("Something went wrong")
+    console.error("Something went wrong");
   }
 
   const data = await response.json();
+  console.log(data);
   return data;
 }
