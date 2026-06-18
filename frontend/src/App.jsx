@@ -6,7 +6,7 @@ import { LoginPage } from "./pages/Login/LoginPage";
 import { SignupPage } from "./pages/Signup/SignupPage";
 import { FeedPage } from "./pages/Feed/FeedPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
-import { FriendsPage } from "./pages/Friends/FriendsPage";
+import { FriendsPage } from "./pages/Following/FollowingPage";
 
 // docs: https://reactrouter.com/en/main/start/overview
 const router = createBrowserRouter([

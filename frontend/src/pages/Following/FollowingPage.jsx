@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getAllFriends } from "../../services/friends";
+import { getAllFriends } from "../../services/following";
 import User from "../../components/User";
 import SearchBar from "../../components/SearchBar";
 

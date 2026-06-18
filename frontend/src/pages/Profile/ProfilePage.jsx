@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
 import LogoutButton from "../../components/LogoutButton";
-import AddFriendButton from "../../components/AddFriendButton";
+import AddFriendButton from "../../components/FollowButton";
 
 function getUserIdFromToken() {
   return localStorage.getItem("userId");
