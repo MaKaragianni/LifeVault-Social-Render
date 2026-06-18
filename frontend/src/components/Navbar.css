@@ -1,0 +1,52 @@
+/* Main navbar */
+.navbar {
+    background-color:#4C4C34;
+    color: #EBDED0;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px; 
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo {
+    height: 120px;
+    width: auto;
+}
+
+/* Centre links */
+.navbar-centre {
+    display: flex;
+    gap: 48px;
+}
+
+.nav-link {
+    color: #EBDED0;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    opacity: 0.8;
+}
+
+/* Logout section */
+.navbar-right button {
+    background: transparent;
+    border: none;
+    color: #EBDED0;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.navbar-right button:hover {
+    opacity: 0.8;
+}

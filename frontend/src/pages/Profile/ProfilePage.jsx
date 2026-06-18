@@ -4,6 +4,7 @@ import { getUser } from "../../services/users";
 import Post from "../../components/Post";
 import LogoutButton from "../../components/LogoutButton";
 import FollowButton from "../../components/FollowButton";
+import Navbar from "../../components/Navbar";
 
 function getUserIdFromToken() {
   return localStorage.getItem("userId");
@@ -44,6 +45,9 @@ export function ProfilePage() {
 
   return (
     <>
+      <Navbar />
+      <div className="page-content">
+
       <h2>Profile</h2>
 
       <img src={user.profilePic} alt="Profile" width="200" />
@@ -60,9 +64,8 @@ export function ProfilePage() {
                 {posts.map((post) => (
                     <Post post={post} key={post._id} />
                 ))}
-            </div>
-
-      <LogoutButton />
+      </div>
+      </div>
     </>
   );
 }
