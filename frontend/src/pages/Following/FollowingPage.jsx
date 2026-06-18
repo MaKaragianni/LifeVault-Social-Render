@@ -5,7 +5,7 @@ import { getAllFriends } from "../../services/following";
 import User from "../../components/User";
 import SearchBar from "../../components/SearchBar";
 
-export function FriendsPage() {
+export function FollowingPage() {
   const [friends, setFriends] = useState([]);
   const navigate = useNavigate();
 
