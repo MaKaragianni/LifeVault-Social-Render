@@ -18,11 +18,13 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// Mocking the signup service
-vi.mock("../../src/services/authentication", () => {
-  const signupMock = vi.fn();
-  return { signup: signupMock };
-});
+// // Mocking the signup service
+// vi.mock("../../src/services/authentication", () => {
+//   const signupMock = vi.fn();
+//   return { signup: signupMock };
+// });
+
+// globalThis.fetch = vi.fn();
 
 const fakeFile = new File(["image"], "profilecle.png", { type: "image/png"});
 
@@ -53,6 +55,20 @@ async function completeSignupForm(fakeFile) {
 describe("Signup Page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mock("../../src/services/authentication", () => {
+  const signupMock = vi.fn();
+  return { signup: signupMock };
+});
+    vi.mock("react-router-dom", () => {
+  const navigateMock = vi.fn();
+  const useNavigateMock = () => navigateMock; 
+  return { useNavigate: useNavigateMock };
+});
+
+globalThis.fetch = vi.fn();
+    globalThis.fetch.mockResolvedValue({
+      json: async () => ({ imageUrl: "" }),
+    });
   });
 
   test("allows a user to signup", async () => {
