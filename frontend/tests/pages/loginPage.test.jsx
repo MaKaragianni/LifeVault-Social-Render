@@ -71,10 +71,13 @@ describe("Login Page", () => {
   });
 
   test("navigates to /posts on successful login", async () => {
-    render(<LoginPage />);
-
     login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
-    const navigateMock = useNavigate();
+
+    render(
+      <MemoryRouter>
+        <LoginPage/>
+      </MemoryRouter>
+    );
 
     await completeLoginForm();
 
