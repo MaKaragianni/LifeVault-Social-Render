@@ -2,63 +2,66 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export async function getAllFriends(token) {
-  const requestOptions = {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  try {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-  const response = await fetch(`${BACKEND_URL}/friends`, requestOptions);
+    const response = await fetch(`${BACKEND_URL}/friends`, requestOptions);
 
-  if (response.status !== 200) {
-    throw new Error("Unable to fetch friends");
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Unable to fetch following data");
   }
-
-  const data = await response.json();
-  return data;
 }
 
 export async function searchUsers(token, searchQuery) {
-  const requestOptions = {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  try {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-  const response = await fetch(
-    `${BACKEND_URL}/users/search?username=${searchQuery}`,
-    requestOptions,
-  );
+    const response = await fetch(
+      `${BACKEND_URL}/users/search?username=${searchQuery}`,
+      requestOptions,
+    );
 
-  if (response.status !== 200) {
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
     throw new Error("Unable to fetch user");
   }
-
-  const data = await response.json();
-  return data;
 }
 
-
 export async function handleFollow(token, friendId) {
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  try {
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-  const response = await fetch(
-    `${BACKEND_URL}/users/${friendId}/handlefollow`,
-    requestOptions,
-  );
+    const response = await fetch(
+      `${BACKEND_URL}/users/${friendId}/handlefollow`,
+      requestOptions,
+    );
 
-  if (response.status !== 200) {
-    console.error("Something went wrong");
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Something went wrong");
   }
-
-  const data = await response.json();
-  console.log(data);
-  return data;
 }

@@ -69,15 +69,6 @@ async function searchUsers(req, res) {
   }
 }
 
-// async function addFriend(req, res) {
-//   const friend = await User.findById(req.params.id);
-//   const user = await User.findById(req.user_id);
-//   user.friends.push(friend._id)
-//   await user.save();
-//   return res.status(200).json({ message: "Friend added" })
-// }
-
-
 async function handleFollow(req, res) {
   const friend = await User.findById(req.params.id);
   const user = await User.findById(req.user_id);
@@ -111,7 +102,6 @@ const UsersController = {
   create,
   getProfile,
   searchUsers,
-  // addFriend,
   handleFollow,
 };
 

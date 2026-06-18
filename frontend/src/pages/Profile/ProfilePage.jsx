@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
-import AddFriendButton from "../../components/AddFriendButton";
+import LogoutButton from "../../components/LogoutButton";
+import FollowButton from "../../components/FollowButton";
 import Navbar from "../../components/Navbar";
 
 function getUserIdFromToken() {
@@ -54,7 +55,7 @@ export function ProfilePage() {
       <div>
         <p>Username: {user.username}</p>
         <p>Bio: {user.bio}</p>
-        <AddFriendButton />
+        <FollowButton />
         <br></br>
         <br></br>
       </div>

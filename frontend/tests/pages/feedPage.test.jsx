@@ -10,9 +10,15 @@ if (typeof window !== "undefined" && !window.localStorage) {
   const mockStorage = {};
   window.localStorage = {
     getItem: (key) => mockStorage[key] || null,
-    setItem: (key, val) => { mockStorage[key] = String(val); },
-    removeItem: (key) => { delete mockStorage[key]; },
-    clear: () => { for (let key in mockStorage) delete mockStorage[key]; }
+    setItem: (key, val) => {
+      mockStorage[key] = String(val);
+    },
+    removeItem: (key) => {
+      delete mockStorage[key];
+    },
+    clear: () => {
+      for (let key in mockStorage) delete mockStorage[key];
+    },
   };
 }
 
