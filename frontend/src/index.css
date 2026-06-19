@@ -71,3 +71,15 @@ body {
   background-color: #4C4C34;        /* warm tan main background */
   color: #413933;
 }
+
+.profile-pic {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4C4C34;
+  box-shadow: 0 0 0 5px #C7AC8F,
+              0 0 0 7px #4C4C34;
+  display: block;
+  margin: 20px auto;
+}

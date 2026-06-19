@@ -48,7 +48,7 @@ export function ProfilePage() {
       <div className="page-content">
         <h2>Profile</h2>
 
-        <img src={user.profilePic} alt="Profile" width="200" />
+        <img className="profile-pic" src={user.profilePic} alt="Profile" width="200" />
 
         <p><strong>Username: </strong>{user.username}</p>
         <p><strong>Bio: </strong>{user.bio}</p>
