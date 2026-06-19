@@ -102,6 +102,7 @@ export function FeedPage() {
             color: "#EBDED0",
             fontFamily: "system-ui",
             fontSize: "1rem",
+            borderRadius: "6px",
             }}
           >
             Post

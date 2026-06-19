@@ -30,7 +30,22 @@ function SearchBar() {
           setSearchQuery(event.target.value);
         }}
       />
-      <button onClick={handleSearch} className="search-button" type="submit">
+      <br></br>
+      <br></br>
+      <button
+        onClick={handleSearch}
+        className="search-button"
+        type="submit"
+        style={{
+          marginLeft: "33px",
+          padding: "8px 16px",
+          background: "#4C4C34",
+          color: "#EBDED0",
+          fontFamily: "system-ui",
+          fontSize: "1rem",
+          borderRadius: "6px",
+        }}
+      >
         Search
       </button>
       <br></br>

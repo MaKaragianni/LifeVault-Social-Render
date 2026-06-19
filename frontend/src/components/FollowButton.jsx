@@ -30,7 +30,19 @@ function FollowButton() {
   }
 
   return (
-    <button className="add-friend" type="submit" onClick={toggleFollowing}>
+    <button
+      className="add-friend"
+      type="submit"
+      onClick={toggleFollowing}
+      style={{
+        padding: "8px 16px",
+        background: "#4C4C34",
+        color: "#EBDED0",
+        fontFamily: "system-ui",
+        fontSize: "1rem",
+        borderRadius: "6px",
+      }}
+    >
       {isFollowing ? "- Unfollow" : "+ Follow"}
     </button>
   );

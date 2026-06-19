@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
-import LogoutButton from "../../components/LogoutButton";
 import FollowButton from "../../components/FollowButton";
 import Navbar from "../../components/Navbar";
 
@@ -47,24 +46,21 @@ export function ProfilePage() {
     <>
       <Navbar />
       <div className="page-content">
+        <h2>Profile</h2>
 
-      <h2>Profile</h2>
+        <img src={user.profilePic} alt="Profile" width="200" />
 
-      <img src={user.profilePic} alt="Profile" width="200" />
-
-      <div>
-        <p>Username: {user.username}</p>
-        <p>Bio: {user.bio}</p>
+        <p><strong>Username: </strong>{user.username}</p>
+        <p><strong>Bio: </strong>{user.bio}</p>
         <FollowButton />
         <br></br>
         <br></br>
-      </div>
 
-      <div className="feed" role="feed">
-                {posts.map((post) => (
-                    <Post post={post} key={post._id} />
-                ))}
-      </div>
+        <div className="feed" role="feed">
+          {posts.map((post) => (
+            <Post post={post} key={post._id} />
+          ))}
+        </div>
       </div>
     </>
   );
