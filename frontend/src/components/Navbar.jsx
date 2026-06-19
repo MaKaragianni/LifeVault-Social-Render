@@ -13,7 +13,7 @@ function Navbar() {
         <Link to="/posts" className="nav-link">
           Feed
         </Link>
-        <Link to="/profile" className="nav-link">
+        <Link to={`/profile/${localStorage.getItem("userId")}`} className="nav-link">
           Profile
         </Link>
         <Link to="/following" className="nav-link">

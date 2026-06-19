@@ -52,7 +52,7 @@ export function ProfilePage() {
 
         <p><strong>Username: </strong>{user.username}</p>
         <p><strong>Bio: </strong>{user.bio}</p>
-        <FollowButton />
+        {id !== localStorage.getItem("userId") && <FollowButton />}
         <br></br>
         <br></br>
 
