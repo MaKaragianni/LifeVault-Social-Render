@@ -1,9 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { vi } from "vitest";
+import { vi, beforeEach, describe, test, expect } from "vitest";
 
 import { FollowingPage } from "../../src/pages/Following/FollowingPage";
 import { getAllFriends } from "../../src/services/following";
-import { useNavigate } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
+
+const mockNavigate = vi.fn();
+const mockParamsId = "60c72b2f9b1d8b2bad6e1a2c";
 
 if (typeof window !== "undefined" && !window.localStorage) {
   const mockStorage = {};
@@ -26,15 +29,19 @@ vi.mock("../../src/services/following", () => {
   return { getAllFriends: getFriendsMock };
 });
 
-vi.mock("react-router-dom", () => {
-  const navigateMock = vi.fn();
-  const useNavigateMock = () => navigateMock;
-  return { useNavigate: useNavigateMock };
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useParams: () => ({ id: mockParamsId }),
+  };
 });
 
 describe("Following Page", () => {
   beforeEach(() => {
     window.localStorage.removeItem("token");
+    vi.clearAllMocks(); // Clear tracking histories between runs
   });
 
   test("It displays all users that the logged in user is following", async () => {
@@ -55,15 +62,24 @@ describe("Following Page", () => {
       token: "newToken",
     });
 
-    render(<FollowingPage />);
+    // Wrapped with MemoryRouter to provide routing context
+    render(
+      <MemoryRouter>
+        <FollowingPage />
+      </MemoryRouter>
+    );
 
     const friend = await screen.findByRole("article");
     expect(friend.textContent).toBe("john_doe");
   });
 
   test("It navigates to login if no token is present", async () => {
-    render(<FollowingPage />);
-    const navigateMock = useNavigate();
-    expect(navigateMock).toHaveBeenCalledWith("/login");
+    render(
+      <MemoryRouter>
+        <FollowingPage />
+      </MemoryRouter>
+    );
+    
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 });

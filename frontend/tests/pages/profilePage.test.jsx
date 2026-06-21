@@ -1,13 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { vi } from "vitest";
+import { vi, beforeAll, beforeEach, describe, test, expect } from "vitest";
 import { ProfilePage } from "../../src/pages/Profile/ProfilePage";
 import { getUser } from "../../src/services/users";
+import { MemoryRouter } from "react-router-dom";
 
-// Creating top-level control variables for mocks
 const mockNavigate = vi.fn();
 let mockParamsId = "60c72b2f9b1d8b2bad6e1a2c";
 
-// Mocking React Router dependencies
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
@@ -17,14 +16,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// Mocking the getUser service
 vi.mock("../../src/services/users", () => {
   return { 
     getUser: vi.fn() 
   };
 });
 
-// Mocking the friends service to eliminate unhandled promise rejections
 vi.mock("../../src/services/friends", () => {
   return {
     getAllFriends: vi.fn().mockResolvedValue([]),
@@ -48,7 +45,6 @@ describe("Profile Page UI Component", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
-    // Reset our mock param back to default before every test
     mockParamsId = "60c72b2f9b1d8b2bad6e1a2c";
   });
 
@@ -68,9 +64,12 @@ describe("Profile Page UI Component", () => {
 
     getUser.mockResolvedValueOnce(stubUserData);
 
-    render(<ProfilePage />);
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>
+    );
 
-    // Using regex matchers so text split across prefixes
     const asyncBioElement = await screen.findByText(/Software developer from London/i);
     
     expect(asyncBioElement).toBeTruthy();
@@ -81,12 +80,31 @@ describe("Profile Page UI Component", () => {
     mockParamsId = undefined; 
     localStorage.removeItem("userId");
 
-    render(<ProfilePage />);
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>
+    );
     
     expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
-  test("renders profile page", () => {
-    render(<ProfilePage />);
+  test("renders profile page", async () => {
+    // Satisfy the useEffect call on mount so .then() doesn't read undefined
+    getUser.mockResolvedValueOnce({
+      user: {
+        _id: "60c72b2f9b1d8b2bad6e1a2c",
+        username: "test_user",
+        bio: "",
+        profilePic: "",
+      },
+      posts: []
+    });
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>
+    );
   });
 });

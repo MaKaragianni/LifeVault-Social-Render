@@ -1,10 +1,33 @@
 import { render, screen } from "@testing-library/react";
-import FriendRequestsPage from "../pages/FriendRequests/FriendRequestsPage";
+import { describe, test, expect, beforeAll, vi } from "vitest";
+import FriendRequestsPage from "../../src/pages/FriendRequests/FriendRequestsPage"; 
 
-test("renders friend requests page", () => {
-  render(<FriendRequestsPage />);
+// Mocking the backend service to prevent real fetch requests
+vi.mock("../../src/services/friendRequests", () => {
+  return {
+    getFriendRequests: vi.fn().mockResolvedValue({
+      requests: [],
+      token: "mock-token"
+    })
+  };
+});
 
-  expect(
-    screen.getByText("Friend Requests")
-  ).toBeInTheDocument();
+describe("Friend Requests Page", () => {
+  beforeAll(() => {
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: vi.fn().mockReturnValue("mock-token-123"),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  test("renders friend requests page", () => {
+    render(<FriendRequestsPage />);
+
+    expect(screen.getByText("Friend Requests")).toBeTruthy();
+  });
 });
