@@ -3,7 +3,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 // SEND FRIEND REQUEST
 export async function sendFriendRequest(userId, token) {
   const res = await fetch(
-    `${API_URL}/friendRequests/request/${userId}`,
+    `${BACKEND_URL}/friendRequests/request/${userId}`,
     {
       method: "POST",
       headers: {
@@ -18,7 +18,7 @@ export async function sendFriendRequest(userId, token) {
 // GET PENDING REQUESTS
 export async function getFriendRequests(token) {
   const res = await fetch(
-    `${API_URL}/friendRequests/requests`,
+    `${BACKEND_URL}/friendRequests/requests`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -35,7 +35,7 @@ export async function acceptFriendRequest(
   token
 ) {
   const res = await fetch(
-    `${API_URL}/friendRequests/accept/${requestId}`,
+    `${BACKEND_URL}/friendRequests/accept/${requestId}`,
     {
       method: "PUT",
       headers: {
@@ -53,7 +53,7 @@ export async function declineFriendRequest(
   token
 ) {
   const res = await fetch(
-    `${API_URL}/friendRequests/decline/${requestId}`,
+    `${BACKEND_URL}/friendRequests/decline/${requestId}`,
     {
       method: "PUT",
       headers: {
@@ -68,7 +68,7 @@ export async function declineFriendRequest(
 // REMOVE FRIEND
 export async function removeFriend(userId, token) {
   const res = await fetch(
-    `${API_URL}/friendRequests/remove/${userId}`,
+    `${BACKEND_URL}/friendRequests/remove/${userId}`,
     {
       method: "DELETE",
       headers: {

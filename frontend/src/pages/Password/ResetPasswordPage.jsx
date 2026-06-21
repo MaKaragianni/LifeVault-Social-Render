@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../../components/Navbar";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -29,29 +30,34 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <form onSubmit={submit}>
-      <h2>Reset Password</h2>
+    <>
+      <Navbar />
+      <div className="page-content">
+        <form onSubmit={submit}>
+          <h2>Reset Password</h2>
 
-      <input
-        placeholder="Token"
-        value={token}
-        onChange={(e) =>
-          setToken(e.target.value)
-        }
-      />
+          <input
+            placeholder="Token"
+            value={token}
+            onChange={(e) =>
+              setToken(e.target.value)
+            }
+          />
 
-      <input
-        placeholder="New Password"
-        type="password"
-        value={password}
-        onChange={(e) =>
-          setPassword(e.target.value)
-        }
-      />
+          <input
+            placeholder="New Password"
+            type="password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+          />
 
-      <button>Reset Password</button>
+          <button className="btn btn-primary">Reset Password</button>
 
-      <p>{message}</p>
-    </form>
+          <p>{message}</p>
+        </form>
+      </div>
+    </>
   );
 }

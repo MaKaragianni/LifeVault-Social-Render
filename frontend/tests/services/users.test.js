@@ -2,7 +2,7 @@ import createFetchMock from "vitest-fetch-mock";
 import { describe, expect, vi, test } from "vitest";
 import { getUser } from "../../src/services/users";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = "http://localhost:3000";
 
 createFetchMock(vi).enableMocks();
 

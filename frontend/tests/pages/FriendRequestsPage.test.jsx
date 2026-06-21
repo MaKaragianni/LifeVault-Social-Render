@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect, beforeAll, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import FriendRequestsPage from "../../src/pages/FriendRequests/FriendRequestsPage"; 
 
 // Mocking the backend service to prevent real fetch requests
@@ -26,8 +27,12 @@ describe("Friend Requests Page", () => {
   });
 
   test("renders friend requests page", () => {
-    render(<FriendRequestsPage />);
+    render(
+      <MemoryRouter>
+        <FriendRequestsPage />
+      </MemoryRouter>
+    );
 
-    expect(screen.getByText("Friend Requests")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Friend Requests", level: 2 })).toBeTruthy();
   });
 });

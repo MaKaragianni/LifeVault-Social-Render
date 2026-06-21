@@ -6,7 +6,7 @@ import { SignupPage } from "./pages/Signup/SignupPage";
 import { FeedPage } from "./pages/Feed/FeedPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
 import { FollowingPage } from "./pages/Following/FollowingPage";
-import { FriendRequestsPage } from "./pages/FriendRequests/FriendRequestsPage";
+import FriendRequestsPage from "./pages/FriendRequests/FriendRequestsPage";
 import ForgotPasswordPage from "./pages/Password/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Password/ResetPasswordPage";
 

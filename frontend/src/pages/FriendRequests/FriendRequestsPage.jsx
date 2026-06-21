@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import Navbar from "../../components/Navbar";
+
 import {
   getFriendRequests,
   acceptFriendRequest,
@@ -15,8 +17,13 @@ export default function FriendRequestsPage() {
   }, []);
 
   async function loadRequests() {
-    const data = await getFriendRequests(token);
-    setRequests(data);
+    try {
+      const data = await getFriendRequests(token);
+      // Ensure we extract the array, defaulting to an empty array as a safety net
+      setRequests(data.requests || []); 
+    } catch (error) {
+      console.error("Failed to load friend requests:", error);
+    }
   }
 
   async function accept(id) {
@@ -30,26 +37,31 @@ export default function FriendRequestsPage() {
   }
 
   return (
-    <div>
-      <h2>Friend Requests</h2>
+    <>
+      <Navbar />
+      <div className="page-content">
+        <div>
+          <h2>Friend Requests</h2>
 
-      {requests.length === 0 && (
-        <p>No pending requests</p>
-      )}
+          {requests.length === 0 && (
+            <p>No pending requests</p>
+          )}
 
-      {requests.map((r) => (
-        <div key={r._id}>
-          <p>{r.sender.username}</p>
+          {requests.map((r) => (
+            <div key={r._id} style={{ margin: '10px 0', display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <p style={{ margin: 0 }}>{r.sender.username}</p>
 
-          <button onClick={() => accept(r._id)}>
-            Accept
-          </button>
+              <button className="btn btn-primary" onClick={() => accept(r._id)}>
+                Accept
+              </button>
 
-          <button onClick={() => decline(r._id)}>
-            Decline
-          </button>
+              <button className="btn btn-secondary" onClick={() => decline(r._id)}>
+                Decline
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      </div>
+    </>
   );
 }

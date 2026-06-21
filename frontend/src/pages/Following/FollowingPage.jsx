@@ -12,41 +12,40 @@ export function FollowingPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const loggedIn = token !== null;
-    if (loggedIn) {
-      getAllFriends(token)
-        .then((data) => {
-          setFriends(data.friends);
-          localStorage.setItem("token", data.token);
-        })
-        .catch((err) => {
-          console.error(err);
-          navigate("/login");
-        });
+    if (!token) {
+      navigate("/login");
+      return;
     }
+
+    getAllFriends(token)
+      .then((data) => {
+        setFriends(data.friends || []);
+        if (data.token) localStorage.setItem("token", data.token);
+      })
+      .catch((err) => {
+        console.error(err);
+        navigate("/login");
+      });
   }, [navigate]);
 
-  const token = localStorage.getItem("token");
-  if (!token) {
-    navigate("/login");
-    return;
+  if (!localStorage.getItem("token")) {
+    return null; 
   }
 
   return (
     <>
       <Navbar />
       <div className="page-content">
-
-      <h2>Search Users:</h2>
-      <SearchBar />
-      <br></br>
-      <br></br>
-      <h2>Following:</h2>
-      <div className="friends" role="friends">
-        {friends.map((friend) => (
-          <User friend={friend} key={friend._id} />
-        ))}
-      </div>
+        <h2>Search Users:</h2>
+        <SearchBar />
+        <br />
+        <br />
+        <h2>Following:</h2>
+        <div className="friends" role="friends">
+          {friends?.map((friend) => (
+            <User friend={friend} key={friend._id} />
+          ))}
+        </div>
       </div>
     </>
   );

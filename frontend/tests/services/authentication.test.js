@@ -3,7 +3,7 @@ import { describe, vi } from "vitest";
 
 import { login, signup } from "../../src/services/authentication";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = "http://localhost:3000";
 
 // Mock fetch function
 createFetchMock(vi).enableMocks();
@@ -83,7 +83,11 @@ describe("authentication service", () => {
       expect(url).toEqual(`${BACKEND_URL}/users`);
       expect(options.method).toEqual("POST");
       expect(options.body).toEqual(
-        JSON.stringify({ email: testEmail, password: testPassword })
+        JSON.stringify({ 
+          email: testEmail,
+          password: testPassword,
+          dateOfBirth: "2000-01-01"
+        })
       );
       expect(options.headers["Content-Type"]).toEqual("application/json");
     });

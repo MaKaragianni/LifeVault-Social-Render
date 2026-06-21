@@ -15,9 +15,12 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  min-width: 320px;
+  flex-direction: column;
   min-height: 100vh;
+  width: 100vw;
   background-color: #EBDED0;
+  color: #413933;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -59,17 +62,6 @@ h1 {
 .btn-secondary:hover {
   background: #4C4C34;
   color: #EBDED0;
-}
-
-/* Make sure body flexes correctly */
-body {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #4C4C34;        /* warm tan main background */
-  color: #413933;
 }
 
 .profile-pic {

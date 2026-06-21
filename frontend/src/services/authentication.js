@@ -35,7 +35,8 @@ export async function signup(email, password, confirmPassword, username, profile
     confirmPassword,
     username,
     profilePic,
-    bio
+    bio,
+    dateOfBirth: "2000-01-01"
   };
 
   const requestOptions = {
