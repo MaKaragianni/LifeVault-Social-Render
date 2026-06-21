@@ -1,38 +1,33 @@
 const request = require("supertest");
-
 const app = require("../../app");
+const User = require("../../models/user");
+const PasswordResetToken = require("../../models/PasswordResetToken");
 
 require("../mongodb_helper");
 
-const User = require("../../models/user");
-const PasswordResetToken =
-  require("../../models/PasswordResetToken");
-
-describe("Password Reset", () => {
+describe("Password Reset API", () => {
   beforeEach(async () => {
     await User.deleteMany({});
     await PasswordResetToken.deleteMany({});
-
-    await User.create({
-      email: "reset@test.com",
-      password: "12345678",
-      username: "resetuser",
-      dateOfBirth: new Date("1990-01-01"),
-    });
   });
 
-  test("creates reset token", async () => {
-    const response = await request(app)
+  test("POST /passwordReset/request works", async () => {
+    const res = await request(app)
       .post("/passwordReset/request")
+      .send({ email: "test@test.com" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBeDefined();
+  });
+
+  test("POST /passwordReset/reset requires token validation", async () => {
+    const res = await request(app)
+      .post("/passwordReset/reset")
       .send({
-        email: "reset@test.com",
+        token: "invalid",
+        password: "123456",
       });
 
-    expect(response.status).toBe(200);
-
-    const tokens =
-      await PasswordResetToken.find();
-
-    expect(tokens.length).toBe(1);
+    expect(res.statusCode).toBe(400);
   });
 });

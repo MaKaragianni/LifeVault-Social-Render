@@ -32,11 +32,13 @@ describe("GET /users/friends", () => {
             email: "user1@test.com",
             password: "Password1!",
             username: "User1",
+            dateOfBirth: "2000-01-01",
         });
         user2 = new User ({
             email: "user2@test.com",
             password: "Password2!",
             username: "User2",
+            dateOfBirth: "2000-01-01",
         });
         token = createToken(user1.id);
         await user1.save();

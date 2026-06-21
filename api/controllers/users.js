@@ -71,6 +71,10 @@ async function searchUsers(req, res) {
       },
     });
 
+    if (users.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     return res.status(200).json(users);
   } catch (err) {
     console.error(err);
