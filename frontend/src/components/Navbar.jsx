@@ -27,4 +27,24 @@ function Navbar() {
   );
 }
 
-export default Navbar; 
+export default function Navbar() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+
+      <Link to="/profile/me">Profile</Link>
+
+      {/* NEW: FRIEND SYSTEM */}
+      <Link to="/friend-requests">
+        Friend Requests
+      </Link>
+
+      {/* NEW: PASSWORD RESET */}
+      <Link to="/forgot-password">
+        Forgot Password
+      </Link>
+    </nav>
+  );
+}
+
+export default Navbar;

@@ -85,4 +85,8 @@ describe("Profile Page UI Component", () => {
     
     expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
+
+  test("renders profile page", () => {
+    render(<ProfilePage />);
+  });
 });
