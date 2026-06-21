@@ -3,6 +3,7 @@ services:
   - type: web
     name: lifevault-api
     env: node
+    plan: free
     rootDir: api
     buildCommand: npm install
     startCommand: npm start
@@ -18,9 +19,10 @@ services:
   - type: web
     name: lifevault-frontend
     runtime: static
+    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_BACKEND_URL
-        value: https://lifevault-api.onrender.com # Directly maps to backend's external URL domain path
+        value: https://lifevault-api.onrender.com
