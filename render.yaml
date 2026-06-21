@@ -1,0 +1,29 @@
+services:
+  # 1. The Express Backend API
+  - type: web
+    name: lifevault-api
+    env: node
+    rootDir: api
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 26.2.0
+      - key: MONGODB_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+
+  # 2. The Vite React Frontend
+  - type: web
+    name: lifevault-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_BACKEND_URL
+        fromService:
+          name: lifevault-api
+          type: web
+          property: url

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
 // SEND FRIEND REQUEST
 export async function sendFriendRequest(userId, token) {
