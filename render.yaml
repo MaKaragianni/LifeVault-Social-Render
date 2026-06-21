@@ -23,7 +23,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_BACKEND_URL
-        fromService:
-          name: lifevault-api
-          type: web
-          property: url
+        value: https://lifevault-api.onrender.com # Directly maps to backend's external URL domain path
