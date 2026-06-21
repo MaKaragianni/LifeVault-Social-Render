@@ -17,6 +17,7 @@ const router = createBrowserRouter([
   { path: "/posts", element: <FeedPage /> },
   { path: "/profile", element: <ProfilePage /> },
   { path: "/profile/:id", element: <ProfilePage /> },
+  { path: "/profile/:username", element: <ProfilePage /> }, // Added from your second block
   { path: "/following", element: <FollowingPage /> },
   { path: "/friend-requests", element: <FriendRequestsPage /> },
   { path: "/forgot-password", element: <ForgotPasswordPage /> },
@@ -26,36 +27,3 @@ const router = createBrowserRouter([
 export default function App() {
   return <RouterProvider router={router} />;
 }
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* PROFILE (USERNAME ROUTE) */}
-        <Route
-          path="/profile/:username"
-          element={<ProfilePage />}
-        />
-
-        {/* FRIEND REQUESTS */}
-        <Route
-          path="/friend-requests"
-          element={<FriendRequestsPage />}
-        />
-
-        {/* PASSWORD RESET FLOW */}
-        <Route
-          path="/forgot-password"
-          element={<ForgotPasswordPage />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPasswordPage />}
-        />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
