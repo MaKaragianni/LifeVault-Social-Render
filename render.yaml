@@ -15,14 +15,12 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # 2. The Vite React Frontend (Static CDN Site)
-  - type: web
+  # 2. The Vite React Frontend (Static Site)
+  - type: static
     name: lifevault-frontend
-    runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishDir: dist
     envVars:
       - key: VITE_BACKEND_URL
         value: https://lifevault-api.onrender.com
