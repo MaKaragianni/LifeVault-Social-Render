@@ -3,44 +3,64 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
+// ROUTES
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
 const authenticationRouter = require("./routes/authentication");
-const tokenChecker = require("./middleware/tokenChecker");
 const uploadRouter = require("./routes/upload");
+
 const friendsRouter = require("./routes/friends");
+const friendRequestRouter = require("./routes/friendRequests");
+const passwordResetRouter = require("./routes/passwordReset");
+
+const tokenChecker = require("./middleware/tokenChecker");
 
 const app = express();
 
-// Allow requests from any client
-// docs: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-// docs: https://expressjs.com/en/resources/middleware/cors.html
-app.use(cors());
+// SECURITY MIDDLEWARE
+app.use(helmet());
 
-// Parse JSON request bodies, made available on `req.body`
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  })
+);
+
+// CORE MIDDLEWARE
+app.use(cors());
 app.use(bodyParser.json());
 
-// API Routes
+// PUBLIC ROUTES
 app.use("/users", usersRouter);
-app.use("/posts", tokenChecker, postsRouter);
 app.use("/tokens", authenticationRouter);
 app.use("/upload", uploadRouter);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/friends", tokenChecker, friendsRouter);
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
-// 404 Handler
+// PROTECTED ROUTES
+app.use("/posts", tokenChecker, postsRouter);
+app.use("/friends", tokenChecker, friendsRouter);
+app.use("/friendRequests", tokenChecker, friendRequestRouter);
+app.use("/passwordReset", passwordResetRouter);
+
+// 404
 app.use((_req, res) => {
-  res.status(404).json({ err: "Error 404: Not Found" });
+  res.status(404).json({ err: "Not Found" });
 });
 
-// Error handler
+// ERROR HANDLER
 app.use((err, _req, res, _next) => {
   console.error(err);
-  if (process.env.NODE_ENV === "development") {
-    res.status(500).send(err.message);
-  } else {
-    res.status(500).json({ err: "Something went wrong" });
-  }
+
+  res.status(500).json({
+    err: "Something went wrong",
+  });
 });
 
 module.exports = app;

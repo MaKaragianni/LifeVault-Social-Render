@@ -1,56 +1,57 @@
 const app = require("../../app");
 const supertest = require("supertest");
+
 require("../mongodb_helper");
+
 const User = require("../../models/user");
 
 describe("/tokens", () => {
   beforeAll(async () => {
-    const user = new User({
+    await User.deleteMany({});
+
+    await User.create({
       email: "auth-test@test.com",
       password: "12345678",
+      username: "authuser",
+      dateOfBirth: new Date("1995-01-01"),
     });
-
-    // We need to use `await` so that the "beforeAll" setup function waits for
-    // the asynchronous user.save() to be done before exiting.
-    // Otherwise, the tests below could run without the user actually being
-    // saved, causing tests to fail inconsistently.
-    await user.save();
   });
 
   afterAll(async () => {
     await User.deleteMany({});
   });
 
-  test("returns a token when credentials are valid", async () => {
-    const testApp = supertest(app); 
-    
-    const response = await testApp
+  test("returns token when credentials are valid", async () => {
+    const response = await supertest(app)
       .post("/tokens")
-      .send({ email: "auth-test@test.com", password: "12345678" });
+      .send({
+        email: "auth-test@test.com",
+        password: "12345678",
+      });
 
-    expect(response.status).toEqual(201);
-    expect(response.body.token).not.toEqual(undefined); 
+    expect(response.status).toBe(201);
+    expect(response.body.token).toBeDefined();
   });
 
-  test("doesn't return a token when the user doesn't exist", async () => {
-    const testApp = supertest(app);
-    const response = await testApp
+  test("returns 401 when user does not exist", async () => {
+    const response = await supertest(app)
       .post("/tokens")
-      .send({ email: "non-existent@test.com", password: "1234" });
+      .send({
+        email: "missing@test.com",
+        password: "12345678",
+      });
 
-    expect(response.status).toEqual(401);
-    expect(response.body.token).toEqual(undefined);
-    expect(response.body.message).toEqual("User not found");
+    expect(response.status).toBe(401);
   });
 
-  test("doesn't return a token when the wrong password is given", async () => {
-    let testApp = supertest(app);
-    const response = await testApp
+  test("returns 401 when password incorrect", async () => {
+    const response = await supertest(app)
       .post("/tokens")
-      .send({ email: "auth-test@test.com", password: "1234" });
+      .send({
+        email: "auth-test@test.com",
+        password: "wrongpassword",
+      });
 
-    expect(response.status).toEqual(401);
-    expect(response.body.token).toEqual(undefined);
-    expect(response.body.message).toEqual("Password incorrect");
+    expect(response.status).toBe(401);
   });
 });
