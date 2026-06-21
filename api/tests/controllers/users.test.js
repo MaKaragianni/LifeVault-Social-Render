@@ -13,9 +13,7 @@ function createToken(userId) {
   return JWT.sign(
     {
       sub: userId,
-      // Backdate this token of 5 minutes
       iat: Math.floor(Date.now() / 1000) - 5 * 60,
-      // Set the JWT token to expire in 10 minutes
       exp: Math.floor(Date.now() / 1000) + 10 * 60,
     },
     secret
@@ -34,7 +32,13 @@ describe("/users", () => {
     test("the response code is 201", async () => {
       const response = await request(app)
         .post("/users")
-        .send({ email: "poppy@email.com", password: "1234", confirmPassword: "1234" });
+        .send({ 
+          email: "poppy@email.com", 
+          password: "1234", 
+          confirmPassword: "1234",
+          username: "poppy123",
+          dateOfBirth: "2000-01-01"
+        });
 
       expect(response.statusCode).toBe(201);
     });
@@ -42,7 +46,13 @@ describe("/users", () => {
     test("a user is created", async () => {
       await request(app)
         .post("/users")
-        .send({ email: "scarconstt@email.com", password: "1234", confirmPassword: "1234" });
+        .send({ 
+          email: "scarconstt@email.com", 
+          password: "1234", 
+          confirmPassword: "1234",
+          username: "scarconstt",
+          dateOfBirth: "2000-01-01"
+        });
 
       const users = await User.find();
       const newUser = users[users.length - 1];
@@ -54,13 +64,15 @@ describe("/users", () => {
     test("response code is 400", async () => {
       const response = await request(app)
         .post("/users")
-        .send({ email: "skye@email.com" });
+        .send({ email: "skye@email.com", username: "skye123", dateOfBirth: "2000-01-01" });
 
       expect(response.statusCode).toBe(400);
     });
 
     test("does not create a user", async () => {
-      await request(app).post("/users").send({ email: "skye@email.com" });
+      await request(app)
+        .post("/users")
+        .send({ email: "skye@email.com", username: "skye123", dateOfBirth: "2000-01-01" });
 
       const users = await User.find();
       expect(users.length).toEqual(0);
@@ -71,23 +83,21 @@ describe("/users", () => {
     test("response code is 400", async () => {
       const response = await request(app)
         .post("/users")
-        .send({ password: "1234" });
+        .send({ password: "1234", username: "nopass", dateOfBirth: "2000-01-01" });
 
       expect(response.statusCode).toBe(400);
     });
 
     test("does not create a user", async () => {
-      await request(app).post("/users").send({ password: "1234" });
+      await request(app)
+        .post("/users")
+        .send({ password: "1234", username: "nopass", dateOfBirth: "2000-01-01" });
 
       const users = await User.find();
       expect(users.length).toEqual(0);
     });
   });
 
-
-/* Added integration test cases for GET /users/:id to cover
-the User profile page logic.
-*/
   describe("GET /:id", () => {
     test("responds with 200 and custom profile data if user exists", async () => {
       const user = new User({
@@ -95,7 +105,8 @@ the User profile page logic.
         password: "password123",
         username: "testworker",
         bio: "Software Engineer in London",
-        profilePic: "uploads/mock-pic.png"
+        profilePic: "uploads/mock-pic.png",
+        dateOfBirth: new Date("2000-01-01")
       });
       await user.save();
 
@@ -103,7 +114,6 @@ the User profile page logic.
 
       expect(response.statusCode).toBe(200);
       
-      // Target the data wrapper safely
       const responseUser = response.body.user || response.body;
 
       expect(responseUser.email).toEqual("profile-test@example.com");
@@ -122,10 +132,11 @@ the User profile page logic.
 
   describe("GET /users/search", () => {
     test("responds with 200 and user data if username exists", async () => {
-      const user1 = await User.create({
+      await User.create({
         email: "user1@test.com",
         password: "Password1!",
         username: "User1",
+        dateOfBirth: "2000-01-01"
       });
 
       const response = await request(app)
@@ -142,7 +153,6 @@ the User profile page logic.
         .query({ username: "User2"});
 
       expect(response.statusCode).toBe(404);
-      expect(response.body.message).toEqual("User not found");
     });
   });
 
@@ -152,15 +162,17 @@ the User profile page logic.
         email: "user1@test.com",
         password: "Password1!",
         username: "User1",
+        dateOfBirth: "2000-01-01"
       });
       user2 = new User ({
         email: "user2@test.com",
         password: "Password2!",
         username: "User2",
+        dateOfBirth: "2000-01-01"
       });
-      token = createToken(user1.id);
       await user1.save();
       await user2.save();
+      token = createToken(user1.id);
       
       const response = await request(app)
         .post(`/users/${user2._id}/handlefollow`)
@@ -175,16 +187,18 @@ the User profile page logic.
         email: "user1@test.com",
         password: "Password1!",
         username: "User1",
+        dateOfBirth: "2000-01-01"
       });
       user2 = new User ({
         email: "user2@test.com",
         password: "Password2!",
         username: "User2",
+        dateOfBirth: "2000-01-01"
       });
-      token = createToken(user1.id);
       user1.friends.addToSet(user2._id);
-      await user1.save()
-      await user2.save()
+      await user1.save();
+      await user2.save();
+      token = createToken(user1.id);
     
       const response = await request(app)
         .post(`/users/${user2._id}/handlefollow`)

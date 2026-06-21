@@ -31,10 +31,12 @@ describe("/posts", () => {
     await User.deleteMany();
     await Post.deleteMany();
 
+    // Added dateOfBirth here to satisfy User schema requirement
     user = await User.create({
       email: "post-test@test.com",
       password: "12345678",
-      username: "test-user"
+      username: "test-user",
+      dateOfBirth: "2000-01-01"
     });
     token = createToken(user.id);
   });
