@@ -1,113 +1,146 @@
 const User = require("../models/user");
 const Post = require("../models/post");
 
-function create(req, res) {
-  const email = req.body.email;
-  const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
-  const username = req.body.username || "";
-  const profilePic = req.body.profilePic || "";
-  const bio = req.body.bio || "";
-
-  // Enforcing validation of matching passwords before touching Mongoose
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: "Passwords do not match" });
-  }
-
-  // confirmPassword is left out here, so that it doesn't save in MongoDB
-  const user = new User({ email, password, username, profilePic, bio });
-  user
-    .save()
-    .then((user) => {
-      console.log("User created, id:", user._id.toString());
-      res.status(201).json({ message: "OK" });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(400).json({ message: "Something went wrong" });
-    });
-}
-
-function getProfile(req, res) {
-  Promise.all([
-    User.findById(req.params.id),
-    Post.find({ user: req.params.id })
-      .populate("user")
-      .sort({ createdAt: -1 }),
-  ])
-    .then(([user, posts]) => {
-      if (!user) {
-        return res.status(404).json({
-          message: "User not found",
-        });
-      }
-
-      res.status(200).json({
-        user,
-        posts,
-      });
-    })
-    .catch((err) => {
-      console.error(err);
-
-      res.status(500).json({
-        message: "Server error",
-      });
-    });
-}
-
-async function searchUsers(req, res) {
+// CREATE USER
+async function create(req, res) {
   try {
-    const user = await User.find({ username: req.query.username });
-    if (user.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+    const {
+      email,
+      password,
+      confirmPassword,
+      username = "",
+      profilePic = "",
+      bio = "",
+      dateOfBirth,
+    } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        message: "Passwords do not match",
+      });
     }
-    return res.status(200).json(user);
+
+    const user = new User({
+      email,
+      password,
+      username,
+      profilePic,
+      bio,
+      dateOfBirth,
+    });
+
+    await user.save();
+
+    console.log("User created:", user._id);
+
+    res.status(201).json({ message: "OK" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Something went wrong" });
+    res.status(400).json({ message: "Something went wrong" });
+  }
+}
+
+// GET PROFILE (BY ID)
+async function getProfile(req, res) {
+  try {
+    const [user, posts] = await Promise.all([
+      User.findById(req.params.id),
+      Post.find({ user: req.params.id })
+        .populate("user")
+        .sort({ createdAt: -1 }),
+    ]);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user, posts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+// SEARCH USERS
+async function searchUsers(req, res) {
+  try {
+    const users = await User.find({
+      username: {
+        $regex: req.query.username || "",
+        $options: "i",
+      },
+    });
+
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Something went wrong" });
   }
 }
 
 async function handleFollow(req, res) {
-  const friend = await User.findById(req.params.id);
-  const user = await User.findById(req.user_id);
-
-  if (user._id.toString() === friend._id.toString()) {
-    return res.status(400).json({ message: "You cannot follow yourself" });
-  }
-
   try {
-    if (user.friends.includes(friend._id)) {
-      await User.updateOne(
-        {_id: user._id},
-        {$pull: {friends: friend._id}
-      })
-      return res.status(200).json({
-        message: "Unfollowed"
-      })
-  } else {
-      await User.updateOne(
-        {_id: user._id},
-        {$addToSet: {friends: friend._id}
-      })
-      return res.status(200).json({
-        message: "Followed"
-      })
+    const friend = await User.findById(req.params.id);
+    const user = await User.findById(req.user_id);
+
+    if (!friend || !user) {
+      return res.status(404).json({ message: "User not found" });
     }
+
+    if (user._id.equals(friend._id)) {
+      return res.status(400).json({
+        message: "You cannot follow yourself",
+      });
+    }
+
+    const isFriend = user.friends.some((id) =>
+      id.equals(friend._id)
+    );
+
+    if (isFriend) {
+      await User.updateOne(
+        { _id: user._id },
+        { $pull: { friends: friend._id } }
+      );
+
+      return res.json({ message: "Unfollowed" });
+    }
+
+    await User.updateOne(
+      { _id: user._id },
+      { $addToSet: { friends: friend._id } }
+    );
+
+    return res.json({ message: "Followed" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      message: "Something went wrong"
-    });
+    res.status(500).json({ message: "Error" });
   }
 }
 
-const UsersController = {
+// GET USER BY USERNAME
+async function getUserByUsername(req, res) {
+  try {
+    const user = await User.findOne({
+      username: req.params.username,
+    }).populate("friends");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+
+module.exports = {
   create,
   getProfile,
   searchUsers,
   handleFollow,
+  getUserByUsername,
 };
-
-module.exports = UsersController;
