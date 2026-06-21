@@ -14,12 +14,13 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # 2. The Vite React Frontend (Static Web Hosting)
-  - type: static
+  # 2. The Vite React Frontend
+  - type: web
     name: lifevault-frontend
+    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishDir: dist
     envVars:
       - key: VITE_BACKEND_URL
         fromService:
