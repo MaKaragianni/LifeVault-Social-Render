@@ -1,5 +1,5 @@
 services:
-  # 1. The Express Backend API
+  # 1. The Express Backend API (Web Service Server)
   - type: web
     name: lifevault-api
     env: node
@@ -14,10 +14,9 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # 2. The Vite React Frontend
-  - type: web
+  # 2. The Vite React Frontend (Static Web Hosting)
+  - type: static
     name: lifevault-frontend
-    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishDir: dist
