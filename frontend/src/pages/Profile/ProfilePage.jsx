@@ -4,6 +4,49 @@ import { getUser } from "../../services/users";
 import Post from "../../components/Post";
 import FollowButton from "../../components/FollowButton";
 import Navbar from "../../components/Navbar";
+import { sendFriendRequest } from "../../services/friendRequests";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export default function ProfilePage() {
+  const { username } = useParams();
+
+  const [user, setUser] = useState(null);
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    loadUser();
+  }, [username]);
+
+  async function loadUser() {
+    const res = await fetch(
+      `${API_URL}/users/username/${username}`
+    );
+
+  const data = await res.json();
+    setUser(data);
+  }
+
+  async function addFriend() {
+    await sendFriendRequest(user._id, token);
+    alert("Friend request sent");
+  }
+
+  if (!user) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <h1>{user.username}</h1>
+
+      <p>{user.bio}</p>
+
+      <button onClick={addFriend}>
+        Add Friend
+      </button>
+    </div>
+  );
+}  
 
 function getUserIdFromToken() {
   return localStorage.getItem("userId");

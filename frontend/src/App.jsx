@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import "./App.css";
 import { HomePage } from "./pages/Home/HomePage";
@@ -7,6 +8,9 @@ import { SignupPage } from "./pages/Signup/SignupPage";
 import { FeedPage } from "./pages/Feed/FeedPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
 import { FollowingPage } from "./pages/Following/FollowingPage";
+import { FriendRequestsPage } from "./pages/FriendRequests/FriendRequestsPage";
+import { ForgotPasswordPage } from "./pages/Password/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/Password/ResetPasswordPage";
 
 // docs: https://reactrouter.com/en/main/start/overview
 const router = createBrowserRouter([
@@ -45,6 +49,37 @@ function App() {
     <>
       <RouterProvider router={router} />
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* PROFILE (USERNAME ROUTE) */}
+        <Route
+          path="/profile/:username"
+          element={<ProfilePage />}
+        />
+
+        {/* FRIEND REQUESTS */}
+        <Route
+          path="/friend-requests"
+          element={<FriendRequestsPage />}
+        />
+
+        {/* PASSWORD RESET FLOW */}
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPasswordPage />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
