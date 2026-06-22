@@ -23,6 +23,13 @@ function createToken(userId) {
 let user1, user2;
 let token;
 
+// Mock the cloudinary config so tests don't make real network calls
+jest.mock("../../cloudinaryConfig", () => {
+  const multer = require("multer");
+  const storage = multer.memoryStorage(); // intercept images safely in memory during tests
+  return multer({ storage });
+});
+
 describe("/users", () => {
   beforeEach(async () => {
     await User.deleteMany({});

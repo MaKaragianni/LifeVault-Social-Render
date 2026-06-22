@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signup } from "../../services/authentication";
 import logo from "../../assets/lifevault_logo_v5.png";
 
 import "./SignupPage.css";
+
+// Dynamic fallback mapping for your deployment environment URLs
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://lifevault-api-plie.onrender.com";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -11,8 +13,9 @@ export function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
-  const [profilePic, setProfilePic] = useState("");
+  const [profilePicFile, setProfilePicFile] = useState(null); // Holds the actual file object
   const [bio, setBio] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const navigate = useNavigate();
 
   function validatePassword(password) {
@@ -46,34 +49,46 @@ export function SignupPage() {
       validatePassword(password) &&
       matchPasswords(password, confirmPassword)
     ) {
+      // Create a unified multi-part form container
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("confirmPassword", confirmPassword);
+      formData.append("username", username);
+      formData.append("bio", bio);
+      formData.append("dateOfBirth", dateOfBirth);
+
+      // Append the raw file binary matching the field key 'profilePic' expected by Multer
+      if (profilePicFile) {
+        formData.append("profilePic", profilePicFile);
+      }
+
       try {
-        await signup(email, password, confirmPassword, username, profilePic, bio);
+        // Send the complete payload directly to the /users registration route
+        const res = await fetch(`${BACKEND_URL}/users`, {
+          method: "POST",
+          body: formData, // No application/json headers; boundary is native
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Signup failed");
+        }
+
         navigate("/login");
       } catch (err) {
         console.error(err);
+        setError(err.message || "Something went wrong during signup.");
         navigate("/signup");
       }
     }
   }
 
-  async function handleProfilePicChange(event) {
+  // Captures the local binary file into local state safely without uploading instantly
+  function handleProfilePicChange(event) {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    try {
-      const res = await fetch("http://localhost:3000/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      setProfilePic(data.imageUrl);
-    } catch (err) {
-      console.error("Upload failed:", err);
-      setError("Image upload failed");
+    if (file) {
+      setProfilePicFile(file);
     }
   }
 
@@ -95,6 +110,10 @@ export function SignupPage() {
 
   function handleBioChange(event) {
     setBio(event.target.value);
+  }
+
+  function handleDateOfBirthChange(event) {
+    setDateOfBirth(event.target.value);
   }
 
   return (
@@ -134,6 +153,14 @@ export function SignupPage() {
             type="text"
             value={username}
             onChange={handleUsernameChange}
+          />
+
+          <label htmlFor="dateOfBirth">Date of Birth</label>
+          <input
+            id="dateOfBirth"
+            type="date"
+            value={dateOfBirth}
+            onChange={handleDateOfBirthChange}
           />
 
           <label htmlFor="profilePic">Profile Picture</label>

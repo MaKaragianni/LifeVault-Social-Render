@@ -10,7 +10,6 @@ const rateLimit = require("express-rate-limit");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
 const authenticationRouter = require("./routes/authentication");
-const uploadRouter = require("./routes/upload");
 
 const friendsRouter = require("./routes/friends");
 const friendRequestRouter = require("./routes/friendRequests");
@@ -34,11 +33,6 @@ app.use(bodyParser.json());
 // PUBLIC ROUTES
 app.use("/users", usersRouter);
 app.use("/tokens", authenticationRouter);
-app.use("/upload", uploadRouter);
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"))
-);
 
 // PROTECTED ROUTES
 app.use("/posts", tokenChecker, postsRouter);

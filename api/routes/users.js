@@ -3,9 +3,10 @@ const router = express.Router();
 
 const tokenChecker = require("../middleware/tokenChecker");
 const UsersController = require("../controllers/users");
+const upload = require("../cloudinaryConfig");
 
 // CREATE USER
-router.post("/", UsersController.create);
+router.post("/", upload.single("profilePic"), UsersController.create);
 
 // SEARCH USERS
 router.get("/search", UsersController.searchUsers);

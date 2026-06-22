@@ -9,7 +9,6 @@ async function create(req, res) {
       password,
       confirmPassword,
       username = "",
-      profilePic = "",
       bio = "",
       dateOfBirth,
     } = req.body;
@@ -20,11 +19,16 @@ async function create(req, res) {
       });
     }
 
+    // SAFE INTEGRATION: 
+    // If a file was uploaded via Cloudinary multer, req.file.path holds the remote URL string.
+    // If no file was sent, it falls back safely to an empty string or a default avatar URL.
+    const profilePicUrl = req.file ? req.file.path : "";
+
     const user = new User({
       email,
       password,
       username,
-      profilePic,
+      profilePic: profilePicUrl, // Saves the actual remote HTTPS link directly
       bio,
       dateOfBirth,
     });

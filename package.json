@@ -10,5 +10,10 @@
     "install:api": "npm install --workspace=api",
     "install:frontend": "npm install --workspace=frontend",
     "build:frontend": "npm run build --workspace=frontend"
+  },
+  "dependencies": {
+    "cloudinary": "^1.41.3",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0"
   }
 }
