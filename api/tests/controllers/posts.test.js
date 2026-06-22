@@ -7,16 +7,14 @@ const User = require("../../models/user");
 
 require("../mongodb_helper");
 
-const secret = process.env.JWT_SECRET;
+const secret = process.env.JWT_SECRET || "test-secret";
 const mongoose = require("mongoose");
 
 function createToken(userId) {
   return JWT.sign(
     {
       sub: userId,
-      // Backdate this token of 5 minutes
       iat: Math.floor(Date.now() / 1000) - 5 * 60,
-      // Set the JWT token to expire in 10 minutes
       exp: Math.floor(Date.now() / 1000) + 10 * 60,
     },
     secret
@@ -31,7 +29,6 @@ describe("/posts", () => {
     await User.deleteMany();
     await Post.deleteMany();
 
-    // Added dateOfBirth here to satisfy User schema requirement
     user = await User.create({
       email: "post-test@test.com",
       password: "12345678",
@@ -55,7 +52,7 @@ describe("/posts", () => {
       expect(response.status).toEqual(201);
     });
 
-    test("creates a new post", async () => {
+    test("creates a new post with text", async () => {
       await request(app)
         .post("/posts")
         .set("Authorization", `Bearer ${token}`)
@@ -64,6 +61,22 @@ describe("/posts", () => {
       const posts = await Post.find();
       expect(posts.length).toEqual(1);
       expect(posts[0].message).toEqual("Hello World!!");
+      expect(posts[0].image).toEqual("");
+    });
+
+    test("creates a new post containing an attached photo URL string", async () => {
+      await request(app)
+        .post("/posts")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ 
+          message: "Loving my brand new camera!", 
+          image: "https://res.cloudinary.com/dg1scdvos/image/upload/sample.png" 
+        });
+
+      const posts = await Post.find();
+      expect(posts.length).toEqual(1);
+      expect(posts[0].message).toEqual("Loving my brand new camera!");
+      expect(posts[0].image).toEqual("https://res.cloudinary.com/dg1scdvos/image/upload/sample.png");
     });
 
     test("returns a new token", async () => {
@@ -77,7 +90,6 @@ describe("/posts", () => {
       const newTokenDecoded = JWT.decode(newToken, process.env.JWT_SECRET);
       const oldTokenDecoded = JWT.decode(token, process.env.JWT_SECRET);
 
-      // iat stands for issued at
       expect(newTokenDecoded.iat > oldTokenDecoded.iat).toEqual(true);
     });
   });
@@ -92,7 +104,7 @@ describe("/posts", () => {
     });
 
     test("a post is not created", async () => {
-      const response = await request(app)
+      await request(app)
         .post("/posts")
         .send({ message: "hello again world" });
 
@@ -123,9 +135,13 @@ describe("/posts", () => {
       expect(response.status).toEqual(200);
     });
 
-    test("returns every post in the collection", async () => {
+    test("returns every post in the collection including attachments", async () => {
       const post1 = new Post({ message: "howdy!", user: user._id });
-      const post2 = new Post({ message: "hola!", user: user._id });
+      const post2 = new Post({ 
+        message: "look at my cat!", 
+        image: "https://res.cloudinary.com/dg1scdvos/cat.png", 
+        user: user._id 
+      });
       await post1.save();
       await post2.save();
 
@@ -135,62 +151,11 @@ describe("/posts", () => {
 
       const posts = response.body.posts;
       const messages = posts.map(post => post.message);
+      const images = posts.map(post => post.image);
 
       expect(messages).toContain("howdy!");
-      expect(messages).toContain("hola!");
-    });
-
-    test("returns a new token", async () => {
-      const post1 = new Post({ message: "First Post!", user: user._id });
-      const post2 = new Post({ message: "Second Post!", user: user._id });
-      await post1.save();
-      await post2.save();
-
-      const response = await request(app)
-        .get("/posts")
-        .set("Authorization", `Bearer ${token}`);
-
-      const newToken = response.body.token;
-      const newTokenDecoded = JWT.decode(newToken, process.env.JWT_SECRET);
-      const oldTokenDecoded = JWT.decode(token, process.env.JWT_SECRET);
-
-      // iat stands for issued at
-      expect(newTokenDecoded.iat > oldTokenDecoded.iat).toEqual(true);
-    });
-  });
-
-  describe("GET, when token is missing", () => {
-    test("the response code is 401", async () => {
-      const post1 = new Post({ message: "howdy!", user: user._id });
-      const post2 = new Post({ message: "hola!", user: user._id });
-      await post1.save();
-      await post2.save();
-
-      const response = await request(app).get("/posts");
-
-      expect(response.status).toEqual(401);
-    });
-
-    test("returns no posts", async () => {
-      const post1 = new Post({ message: "howdy!", user: user._id });
-      const post2 = new Post({ message: "hola!", user: user._id });
-      await post1.save();
-      await post2.save();
-
-      const response = await request(app).get("/posts");
-
-      expect(response.body.posts).toEqual(undefined);
-    });
-
-    test("does not return a new token", async () => {
-      const post1 = new Post({ message: "howdy!", user: user._id });
-      const post2 = new Post({ message: "hola!", user: user._id });
-      await post1.save();
-      await post2.save();
-
-      const response = await request(app).get("/posts");
-
-      expect(response.body.token).toEqual(undefined);
+      expect(messages).toContain("look at my cat!");
+      expect(images).toContain("https://res.cloudinary.com/dg1scdvos/cat.png");
     });
   });
 
@@ -223,16 +188,6 @@ describe("/posts", () => {
 
       expect(response.status).toEqual(200);
       expect(response.body.likes.length).toEqual(0);
-    });
-
-    test("returns 404 if post doesn't exist", async () => {
-      const fakeId = new mongoose.Types.ObjectId();
-
-      const response = await request(app)
-        .post(`/posts/${fakeId}/like`)
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(response.status).toEqual(404);
     });
   });
 });

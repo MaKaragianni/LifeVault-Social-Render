@@ -6,8 +6,7 @@ const User = require("../../models/user");
 
 require("../mongodb_helper");
 
-const secret = process.env.JWT_SECRET;
-const mongoose = require("mongoose");
+const secret = process.env.JWT_SECRET || "test-secret";
 
 function createToken(userId) {
   return JWT.sign(
@@ -20,13 +19,10 @@ function createToken(userId) {
   );
 }
 
-let user1, user2;
-let token;
-
 // Mock the cloudinary config so tests don't make real network calls
 jest.mock("../../cloudinaryConfig", () => {
   const multer = require("multer");
-  const storage = multer.memoryStorage(); // intercept images safely in memory during tests
+  const storage = multer.memoryStorage();
   return multer({ storage });
 });
 
@@ -120,7 +116,6 @@ describe("/users", () => {
       const response = await request(app).get(`/users/${user._id}`);
 
       expect(response.statusCode).toBe(200);
-      
       const responseUser = response.body.user || response.body;
 
       expect(responseUser.email).toEqual("profile-test@example.com");
@@ -139,15 +134,23 @@ describe("/users", () => {
 
   describe("GET /users/search", () => {
     test("responds with 200 and user data if username exists", async () => {
-      await User.create({
+      const targetUser = await User.create({
         email: "user1@test.com",
         password: "Password1!",
         username: "User1",
         dateOfBirth: "2000-01-01"
       });
+      const activeUser = await User.create({
+        email: "active@test.com",
+        password: "Password1!",
+        username: "ActiveUser",
+        dateOfBirth: "2000-01-01"
+      });
+      const userToken = createToken(activeUser._id);
 
       const response = await request(app)
         .get("/users/search")
+        .set("Authorization", `Bearer ${userToken}`)
         .query({ username: "User1"});
 
       expect(response.statusCode).toBe(200);

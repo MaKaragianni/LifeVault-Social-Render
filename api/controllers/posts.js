@@ -28,7 +28,7 @@ async function getAllPosts(req, res) {
 async function createPost(req, res) {
   try {
     const post = new Post({
-      message: req.body.message,
+      message: req.body.message || "",
       image: req.body.image || "",
       user: req.user_id,
     });
@@ -38,7 +38,7 @@ async function createPost(req, res) {
     const token = generateToken(req.user_id);
 
     res.status(201).json({
-      message: "Post created",
+      message: "Post created successfully",
       token,
     });
   } catch (err) {
@@ -74,14 +74,8 @@ async function toggleLike(req, res) {
 
     } catch (err) {
     console.error(err);
-    res.status(500).json({message: "Something went wrong"});
+    res.status(500).json({message: "Failed to like post"});
   }
 };
 
-const PostsController = {
-  getAllPosts: getAllPosts,
-  createPost: createPost,
-  togglelike: toggleLike,
-};
-
-module.exports = PostsController;
+module.exports = { getAllPosts, createPost, toggleLike };

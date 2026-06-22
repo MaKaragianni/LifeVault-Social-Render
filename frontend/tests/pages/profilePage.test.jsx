@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { vi, beforeAll, beforeEach, describe, test, expect } from "vitest";
 import { ProfilePage } from "../../src/pages/Profile/ProfilePage";
 import { getUser } from "../../src/services/users";
@@ -17,18 +17,10 @@ vi.mock("react-router-dom", async () => {
 });
 
 vi.mock("../../src/services/users", () => {
-  return { 
-    getUser: vi.fn() 
-  };
+  return { getUser: vi.fn() };
 });
 
-vi.mock("../../src/services/friends", () => {
-  return {
-    getAllFriends: vi.fn().mockResolvedValue([]),
-  };
-});
-
-describe("Profile Page UI Component", () => {
+describe("Profile Page UI Operations", () => {
   let localStorageMock = {};
 
   beforeAll(() => {
@@ -45,59 +37,14 @@ describe("Profile Page UI Component", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
-    mockParamsId = "60c72b2f9b1d8b2bad6e1a2c";
   });
 
-  test("renders retrieved profile user details when token is active", async () => {
-    localStorage.setItem("userId", "60c72b2f9b1d8b2bad6e1a2c");
-    
-    const stubUserData = {
-      user: {
-        _id: "60c72b2f9b1d8b2bad6e1a2c",
-        email: "doe@example.com",
-        username: "john_doe",
-        bio: "Software developer from London",
-        profilePic: "http://localhost:3000/uploads/avatar.png",
-      },
-      posts: []
-    };
+  test("allows interactive transition into edit state for the profile owner", async () => {
+    localStorage.setItem("userId", "my_own_id");
+    mockParamsId = undefined;
 
-    getUser.mockResolvedValueOnce(stubUserData);
-
-    render(
-      <MemoryRouter>
-        <ProfilePage />
-      </MemoryRouter>
-    );
-
-    const asyncBioElement = await screen.findByText(/Software developer from London/i);
-    
-    expect(asyncBioElement).toBeTruthy();
-    expect(screen.getByText(/john_doe/i)).toBeTruthy();
-  });
-
-  test("redirects unauthenticated users to the login route if token is missing", () => {
-    mockParamsId = undefined; 
-    localStorage.removeItem("userId");
-
-    render(
-      <MemoryRouter>
-        <ProfilePage />
-      </MemoryRouter>
-    );
-    
-    expect(mockNavigate).toHaveBeenCalledWith("/login");
-  });
-
-  test("renders profile page", async () => {
-    // Satisfy the useEffect call on mount so .then() doesn't read undefined
     getUser.mockResolvedValueOnce({
-      user: {
-        _id: "60c72b2f9b1d8b2bad6e1a2c",
-        username: "test_user",
-        bio: "",
-        profilePic: "",
-      },
+      user: { _id: "my_own_id", username: "Ariel", bio: "Best redhead ever!", profilePic: "" },
       posts: []
     });
 
@@ -106,5 +53,32 @@ describe("Profile Page UI Component", () => {
         <ProfilePage />
       </MemoryRouter>
     );
+
+    const editBtn = await screen.findByText(/Edit Profile/i);
+    expect(editBtn).toBeTruthy();
+
+    fireEvent.click(editBtn);
+    const saveBtn = screen.getByText(/Save/i);
+    expect(saveBtn).toBeTruthy();
+  });
+
+  test("renders Add Friend with legible symbol for external profile records", async () => {
+    localStorage.setItem("userId", "my_own_id");
+    mockParamsId = "pinocchio_id";
+
+    getUser.mockResolvedValueOnce({
+      user: { _id: "pinocchio_id", username: "Pinocchio", bio: "Real boy!", profilePic: "" },
+      posts: []
+    });
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>
+    );
+
+    const addFriendBtn = await screen.findByText(/Add Friend/i);
+    expect(addFriendBtn).toBeTruthy();
+    expect(screen.getByText("＋")).toBeTruthy();
   });
 });

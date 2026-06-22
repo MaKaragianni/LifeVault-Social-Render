@@ -10,13 +10,14 @@ function SearchBar() {
   const navigate = useNavigate();
 
   const handleSearch = async (e) => {
-    if (e) e.preventDefault(); // Prevent accidental form submissons if wrapped in a form
+    if (e) e.preventDefault(); 
     try {
       const token = localStorage.getItem("token");
-      if (token !== null) {
+      if (token) {
+        // Ensure token is passed cleanly here to the service
         const result = await searchUsers(token, searchQuery);
         setSearchResult(result);
-        setError(""); // Clear any previous errors
+        setError(""); 
       } else {
         navigate("/login");
       }
@@ -85,7 +86,17 @@ function SearchBar() {
           minWidth: "220px"
         }}>
           {searchResult.map((user) => (
-            <User key={user._id} friend={user} />
+            <div 
+              key={user._id} 
+              onClick={() => {
+                setSearchResult([]); 
+                setSearchQuery("");
+                navigate(`/profile/${user._id}`);
+              }}
+              style={{ cursor: "pointer", borderBottom: "1px solid #f0f0f0" }}
+            >
+              <User friend={user} />
+            </div>
           ))}
           {error && <p style={{ color: "red", margin: 0, fontSize: "0.9rem" }}>{error}</p>}
         </div>

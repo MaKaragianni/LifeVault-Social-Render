@@ -68,12 +68,20 @@ async function getProfile(req, res) {
 // SEARCH USERS
 async function searchUsers(req, res) {
   try {
-    const users = await User.find({
+    const searchString = req.query.username || "";
+    
+    const queryConditions = {
       username: {
-        $regex: req.query.username || "",
+        $regex: searchString,
         $options: "i",
-      },
-    });
+      }
+    };
+
+    if (req.user_id) {
+      queryConditions._id = { $ne: req.user_id };
+    }
+
+    const users = await User.find(queryConditions);
 
     if (users.length === 0) {
       return res.status(404).json({ message: "User not found" });
