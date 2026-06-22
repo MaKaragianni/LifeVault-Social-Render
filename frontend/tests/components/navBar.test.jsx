@@ -27,7 +27,7 @@ describe("Navbar Component", () => {
     expect(logo).toBeTruthy();
   });
 
-  it("contains links to Feed, Profile and Following pages", () => {
+  it("contains links to Feed, Profile and Friends pages", () => {
     render(
       <MemoryRouter>
         <Navbar />
@@ -37,15 +37,15 @@ describe("Navbar Component", () => {
     // Verifying the links exist and display correctly
     const feedLink = screen.getByRole("link", { name: /feed/i });
     const profileLink = screen.getByRole("link", { name: /profile/i });
-    const followingLink = screen.getByRole("link", { name: /following/i });
+    const friendsLink = screen.getByRole("link", { name: /friends/i });
 
     expect(feedLink).toBeTruthy();
     expect(profileLink).toBeTruthy();
-    expect(followingLink).toBeTruthy();
+    expect(friendsLink).toBeTruthy();
 
     // Verifying the links navigate to the right URLs
     expect(feedLink.getAttribute("href")).toBe("/posts");
     expect(profileLink.getAttribute("href")).toBe("/profile/60c72b2f9b1d8b2bad6e1a2c");
-    expect(followingLink.getAttribute("href")).toBe("/following");   
+    expect(friendsLink.getAttribute("href")).toBe("/friends");   
   });
 });

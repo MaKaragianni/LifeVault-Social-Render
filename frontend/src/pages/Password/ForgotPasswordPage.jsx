@@ -30,36 +30,24 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <Navbar />
-      <div className="page-content">
-        <form 
-          onSubmit={submit} 
-          className="friends" 
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-        >
-          <h2>Forgot Password</h2>
-          
+      <div className="page-content" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+        <h2>Forgot Password</h2>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
           <input 
             type="email" 
             placeholder="Email" 
             className="search-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ padding: '8px', width: '250px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ padding: '10px', width: '280px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }}
             required
           />
-          
-          <br />
-          <br />
 
-          <button 
-            type="submit"
-            className="btn btn-primary"
-            style={{ padding: '10px 20px', cursor: 'pointer' }}
-          >
+          <button type="submit" className="btn btn-primary">
             Send Reset Link
           </button>
 
-          {message && <p style={{ marginTop: '15px', color: '#555' }}>{message}</p>}
+          {message && <p style={{ marginTop: '15px', color: '#413933' }}>{message}</p>}
         </form>
       </div>
     </>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { searchUsers } from "../services/following";
+import { searchUsers } from "../services/friends";
 import { useNavigate } from "react-router-dom";
 import User from "../components/User";
 

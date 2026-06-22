@@ -21,12 +21,9 @@ const tokenChecker = require("./middleware/tokenChecker");
 const app = express();
 
 // SECURITY MIDDLEWARE
-app.use(helmet());
-
 app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 

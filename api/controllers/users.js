@@ -82,45 +82,6 @@ async function searchUsers(req, res) {
   }
 }
 
-async function handleFollow(req, res) {
-  try {
-    const friend = await User.findById(req.params.id);
-    const user = await User.findById(req.user_id);
-
-    if (!friend || !user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (user._id.equals(friend._id)) {
-      return res.status(400).json({
-        message: "You cannot follow yourself",
-      });
-    }
-
-    const isFriend = user.friends.some((id) =>
-      id.equals(friend._id)
-    );
-
-    if (isFriend) {
-      await User.updateOne(
-        { _id: user._id },
-        { $pull: { friends: friend._id } }
-      );
-
-      return res.json({ message: "Unfollowed" });
-    }
-
-    await User.updateOne(
-      { _id: user._id },
-      { $addToSet: { friends: friend._id } }
-    );
-
-    return res.json({ message: "Followed" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error" });
-  }
-}
 
 // GET USER BY USERNAME
 async function getUserByUsername(req, res) {
@@ -145,6 +106,5 @@ module.exports = {
   create,
   getProfile,
   searchUsers,
-  handleFollow,
   getUserByUsername,
 };

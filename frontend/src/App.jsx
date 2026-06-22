@@ -5,7 +5,7 @@ import { LoginPage } from "./pages/Login/LoginPage";
 import { SignupPage } from "./pages/Signup/SignupPage";
 import { FeedPage } from "./pages/Feed/FeedPage";
 import { ProfilePage } from "./pages/Profile/ProfilePage";
-import { FollowingPage } from "./pages/Following/FollowingPage";
+import FriendsPage from "./pages/Friends/FriendsPage";
 import FriendRequestsPage from "./pages/FriendRequests/FriendRequestsPage";
 import ForgotPasswordPage from "./pages/Password/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Password/ResetPasswordPage";
@@ -17,8 +17,8 @@ const router = createBrowserRouter([
   { path: "/posts", element: <FeedPage /> },
   { path: "/profile", element: <ProfilePage /> },
   { path: "/profile/:id", element: <ProfilePage /> },
-  { path: "/profile/:username", element: <ProfilePage /> }, // Added from your second block
-  { path: "/following", element: <FollowingPage /> },
+  { path: "/profile/:username", element: <ProfilePage /> },
+  { path: "/friends", element: <FriendsPage /> },
   { path: "/friend-requests", element: <FriendRequestsPage /> },
   { path: "/forgot-password", element: <ForgotPasswordPage /> },
   { path: "/reset-password", element: <ResetPasswordPage /> },

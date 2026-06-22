@@ -10,19 +10,13 @@ router.post("/", UsersController.create);
 // SEARCH USERS
 router.get("/search", UsersController.searchUsers);
 
+// GET PROFILE (BY ID)
+router.get("/:id", UsersController.getProfile);
+
 // GET USER BY USERNAME
 router.get(
   "/username/:username",
   UsersController.getUserByUsername
-);
-
-// GET PROFILE BY ID
-router.get("/:id", UsersController.getProfile);
-
-router.post(
-  "/:id/handlefollow",
-  tokenChecker,
-  UsersController.handleFollow
 );
 
 module.exports = router;

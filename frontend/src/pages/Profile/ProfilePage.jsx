@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUser } from "../../services/users";
 import Post from "../../components/Post";
-import FollowButton from "../../components/FollowButton";
 import Navbar from "../../components/Navbar";
 
 function getUserIdFromToken() {
@@ -52,7 +51,6 @@ export function ProfilePage() {
 
         <p><strong>Username: </strong>{user.username}</p>
         <p><strong>Bio: </strong>{user.bio}</p>
-        {id !== localStorage.getItem("userId") && <FollowButton />}
         <br />
         <br />
 

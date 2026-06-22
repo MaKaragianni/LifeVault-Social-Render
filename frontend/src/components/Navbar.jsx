@@ -14,7 +14,7 @@ export default function Navbar() {
       <div className="navbar-centre">
         <Link to="/posts" className="nav-link">Feed</Link>
         <Link to={`/profile/${userId}`} className="nav-link">Profile</Link>
-        <Link to="/following" className="nav-link">Following</Link>
+        <Link to="/friends" className="nav-link">Friends</Link>
         <Link to="/friend-requests" className="nav-link">Friend Requests</Link>
         <Link to="/forgot-password" className="nav-link">Forgot Password</Link>
       </div>
