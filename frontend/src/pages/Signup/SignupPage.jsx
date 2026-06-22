@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { signup } from "../../services/authentication";
 import logo from "../../assets/lifevault_logo_v5.png";
 
 import "./SignupPage.css";
-
-// Dynamic fallback mapping for your deployment environment URLs
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://lifevault-api-plie.onrender.com";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +11,7 @@ export function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
-  const [profilePicFile, setProfilePicFile] = useState(null); // Holds the actual file object
+  const [profilePicFile, setProfilePicFile] = useState(null); 
   const [bio, setBio] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const navigate = useNavigate();
@@ -49,32 +47,9 @@ export function SignupPage() {
       validatePassword(password) &&
       matchPasswords(password, confirmPassword)
     ) {
-      // Create a unified multi-part form container
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("confirmPassword", confirmPassword);
-      formData.append("username", username);
-      formData.append("bio", bio);
-      formData.append("dateOfBirth", dateOfBirth);
-
-      // Append the raw file binary matching the field key 'profilePic' expected by Multer
-      if (profilePicFile) {
-        formData.append("profilePic", profilePicFile);
-      }
-
       try {
-        // Send the complete payload directly to the /users registration route
-        const res = await fetch(`${BACKEND_URL}/users`, {
-          method: "POST",
-          body: formData, // No application/json headers; boundary is native
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || "Signup failed");
-        }
-
+        // Send inputs cleanly down into your service layer
+        await signup(email, password, confirmPassword, username, profilePicFile, bio, dateOfBirth);
         navigate("/login");
       } catch (err) {
         console.error(err);
@@ -84,7 +59,6 @@ export function SignupPage() {
     }
   }
 
-  // Captures the local binary file into local state safely without uploading instantly
   function handleProfilePicChange(event) {
     const file = event.target.files?.[0];
     if (file) {

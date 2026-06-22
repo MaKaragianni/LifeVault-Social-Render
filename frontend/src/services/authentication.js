@@ -28,33 +28,30 @@ export async function login(email, password) {
   }
 }
 
-export async function signup(email, password, confirmPassword, username, profilePic, bio) {
-  const payload = {
-    email,
-    password,
-    confirmPassword,
-    username,
-    profilePic,
-    bio,
-    dateOfBirth: "2000-01-01"
-  };
+export async function signup(email, password, confirmPassword, username, profilePicFile, bio, dateOfBirth) {
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("password", password);
+  formData.append("confirmPassword", confirmPassword);
+  formData.append("username", username);
+  formData.append("bio", bio);
+  formData.append("dateOfBirth", dateOfBirth || "2000-01-01"); // Safe default if left blank
 
-  const requestOptions = {
+  if (profilePicFile) {
+    formData.append("profilePic", profilePicFile);
+  }
+
+  const response = await fetch(`${BACKEND_URL}/users`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  };
+    body: formData, // No application/json headers needed; FormData sets boundaries natively
+  });
 
-  let response = await fetch(`${BACKEND_URL}/users`, requestOptions);
-
-  // docs: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201
   if (response.status === 201) {
     return;
   } else {
+    const errorData = await response.json().catch(() => ({}));
     throw new Error(
-      `Received status ${response.status} when signing up. Expected 201`
+      errorData.message || `Received status ${response.status} when signing up. Expected 201`
     );
   }
 }

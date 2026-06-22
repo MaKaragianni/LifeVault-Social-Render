@@ -68,8 +68,9 @@ describe("Signup Page", () => {
       "Hello14!",
       "Hello14!",
       "test",
-      "",
+      fakeFile, // This passes the actual file object instead of an empty string
       "this is the test bio",
+      "" // Accommodates the dateOfBirth field argument
     );
   });
 

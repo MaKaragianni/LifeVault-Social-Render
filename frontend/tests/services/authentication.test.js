@@ -73,23 +73,22 @@ describe("authentication service", () => {
         status: 201,
       });
 
-      await signup(testEmail, testPassword);
+      // Pass matching parameters to the service call
+      await signup(testEmail, testPassword, testPassword, "testuser", null, "my bio", "2000-01-01");
 
-      // This is an array of the arguments that were last passed to fetch
       const fetchArguments = fetch.mock.lastCall;
       const url = fetchArguments[0];
       const options = fetchArguments[1];
 
       expect(url).toEqual(`${BACKEND_URL}/users`);
       expect(options.method).toEqual("POST");
-      expect(options.body).toEqual(
-        JSON.stringify({ 
-          email: testEmail,
-          password: testPassword,
-          dateOfBirth: "2000-01-01"
-        })
-      );
-      expect(options.headers["Content-Type"]).toEqual("application/json");
+      
+      // Since body is FormData, inspect its contents using .get()
+      expect(options.body.get("email")).toEqual(testEmail);
+      expect(options.body.get("password")).toEqual(testPassword);
+      expect(options.body.get("dateOfBirth")).toEqual("2000-01-01");
+      
+      // Notice: We don't check Content-Type headers here because the browser evaluates FormData boundaries dynamically!
     });
 
     test("returns nothing if the signup request was a success", async () => {
@@ -119,7 +118,7 @@ describe("authentication service", () => {
         await signup(testEmail, testPassword);
       } catch (err) {
         expect(err.message).toEqual(
-          "Received status 400 when signing up. Expected 201"
+          "User already exists"
         );
       }
     });
