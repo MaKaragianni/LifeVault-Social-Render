@@ -3,6 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, beforeAll, vi } from "vitest";
 import Navbar from "../../src/components/Navbar";
 
+vi.mock("../../src/components/SearchBar", () => {
+  return {
+    default: () => <div data-testid="mock-search-bar">Search Bar Mock</div>
+  };
+});
+
 describe("Navbar Component", () => {
   beforeAll(() => {
     Object.defineProperty(window, "localStorage", {
