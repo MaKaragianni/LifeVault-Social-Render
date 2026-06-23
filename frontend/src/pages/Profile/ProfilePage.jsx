@@ -19,12 +19,10 @@ export function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Editing states
   const [isEditing, setIsEditing] = useState(false);
   const [bioText, setBioText] = useState("");
   const [usernameText, setUsernameText] = useState(""); 
 
-  // Moved out of useEffect so handlers can trigger re-fetches cleanly
   const loadProfileData = async () => {
     try {
       setLoading(true);
@@ -70,6 +68,12 @@ export function ProfilePage() {
     loadProfileData();
   }, [targetUserId, navigate]);
 
+  // Check if logged-in user is already a friend of this profile target
+  const isAlreadyFriend = user?.friends?.some(f => {
+    const friendId = typeof f === "object" ? f._id : f;
+    return String(friendId) === String(loggedInUserId);
+  });
+
   const handleAddFriend = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -89,6 +93,30 @@ export function ProfilePage() {
     }
   };
 
+  const handleRemoveFriend = async () => {
+    if (!window.confirm("Are you sure you want to remove this friend?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/users/${targetUserId}/unfriend`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        alert("Removed from friends list.");
+        await loadProfileData();
+      }
+    } catch (err) {
+      console.error(err);
+      setUser(prev => ({
+        ...prev,
+        friends: prev.friends.filter(f => (typeof f === 'object' ? f._id : f) !== loggedInUserId)
+      }));
+    }
+  };
+
   const handleAcceptFriend = async (requestId) => {
     try {
       const token = localStorage.getItem("token");
@@ -98,7 +126,7 @@ export function ProfilePage() {
       });
       if (res.ok) {
         alert("Friend request accepted!");
-        await loadProfileData(); // Live updates the UI lists immediately
+        await loadProfileData(); 
       }
     } catch (err) {
       console.error(err);
@@ -114,7 +142,7 @@ export function ProfilePage() {
       });
       if (res.ok) {
         alert("Friend request removed.");
-        await loadProfileData(); // Live updates the UI lists immediately
+        await loadProfileData(); 
       }
     } catch (err) {
       console.error(err);
@@ -138,11 +166,7 @@ export function ProfilePage() {
   };
 
   if (loading)
-    return (
-      <p style={{ padding: "30px", fontSize: "1.2rem", color: "#4C4C34" }}>
-        Loading profile...
-      </p>
-    );
+    return <p style={{ padding: "30px", fontSize: "1.2rem", color: "#4C4C34" }}>Loading profile...</p>;
 
   if (error)
     return (
@@ -163,40 +187,17 @@ export function ProfilePage() {
   return (
     <>
       <Navbar />
-      <div
-        className="page-content"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "600px",
-            textAlign: "center",
-            color: "#4C4C34",
-          }}
-        >
+      <div className="page-content" style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px" }}>
+        <div style={{ width: "100%", maxWidth: "600px", textAlign: "center", color: "#4C4C34" }}>
           <h2 style={{ fontWeight: "bold", marginBottom: "20px" }}>Profile</h2>
 
           <img
             className="profile-pic"
             src={user.profilePic || "https://via.placeholder.com/200"}
             alt="Profile"
-            style={{
-              width: "200px",
-              height: "200px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "4px solid #4C4C34",
-              marginBottom: "15px",
-            }}
+            style={{ width: "200px", height: "200px", borderRadius: "50%", objectFit: "cover", border: "4px solid #4C4C34", marginBottom: "15px" }}
           />
 
-          {/* Username Section */}
           <div style={{ margin: "10px 0", fontSize: "1.1rem" }}>
             <strong>Username: </strong>
             {isEditing ? (
@@ -211,7 +212,6 @@ export function ProfilePage() {
             )}
           </div>
 
-          {/* Bio Section */}
           <div style={{ margin: "10px 0" }}>
             <strong>Bio: </strong>
             {isEditing ? (
@@ -219,108 +219,48 @@ export function ProfilePage() {
                 <textarea
                   value={bioText}
                   onChange={(e) => setBioText(e.target.value)}
-                  style={{
-                    width: "80%",
-                    padding: "5px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc"
-                  }}
+                  style={{ width: "80%", padding: "5px", borderRadius: "4px", border: "1px solid #ccc" }}
                 />
                 <br />
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px" }}>
-                  <button
-                    onClick={handleSaveChanges}
-                    style={{
-                      ...actionButtonStyle,
-                      width: "80px",
-                      height: "30px",
-                      lineHeight: "30px",
-                      background: "#2e7d32",
-                    }}
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={handleCancelChanges}
-                    style={{
-                      ...actionButtonStyle,
-                      width: "80px",
-                      height: "30px",
-                      lineHeight: "30px",
-                      background: "#d32f2f",
-                    }}
-                  >
-                    Cancel
-                  </button>
+                  <button onClick={handleSaveChanges} style={{ ...actionButtonStyle, width: "80px", height: "30px", lineHeight: "30px", background: "#2e7d32" }}>Save</button>
+                  <button onClick={handleCancelChanges} style={{ ...actionButtonStyle, width: "80px", height: "30px", lineHeight: "30px", background: "#d32f2f" }}>Cancel</button>
                 </div>
               </div>
             ) : (
-              <span style={{ fontSize: "1.05rem", color: "#60554c" }}>
-                {user.bio || "No bio yet."}
-              </span>
+              <span style={{ fontSize: "1.05rem", color: "#60554c" }}>{user.bio || "No bio yet."}</span>
             )}
           </div>
 
-          {/* Main Action Buttons */}
+          {/* Action Button Section with Conditional Friends Mapping Logic */}
           <div style={{ marginTop: "20px", marginBottom: "40px" }}>
             {isOwnProfile ? (
-              !isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  style={actionButtonStyle}
-                >
-                  ⚙️ Edit Profile
-                </button>
-              )
+              !isEditing && <button onClick={() => setIsEditing(true)} style={actionButtonStyle}>⚙️ Edit Profile</button>
+            ) : isAlreadyFriend ? (
+              <button onClick={handleRemoveFriend} style={{ ...actionButtonStyle, background: "#d32f2f" }}>❌ Unfriend</button>
             ) : (
               <button onClick={handleAddFriend} style={actionButtonStyle}>
-                <span style={{ color: "#EBDED0", marginRight: "4px" }}>＋</span>{" "}
-                Add Friend
+                <span style={{ color: "#EBDED0", marginRight: "4px" }}>＋</span> Add Friend
               </button>
             )}
           </div>
 
-          {/* Facebook-inspired Friend Request Panel */}
+          {/* Friend Requests Interface */}
           {isOwnProfile && friendRequests.length > 0 && (
-            <div style={{
-              background: "#ffffff",
-              borderRadius: "8px",
-              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
-              padding: "16px",
-              marginBottom: "20px",
-              width: "100%",
-              maxWidth: "600px",
-              boxSizing: "border-box",
-              textAlign: "left",
-              fontFamily: "Segoe UI, Helvetica, Arial, sans-serif"
-            }}>
+            <div style={{ background: "#ffffff", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)", padding: "16px", marginBottom: "20px", width: "100%", maxWidth: "600px", boxSizing: "border-box", textAlign: "left", fontFamily: "Segoe UI, Helvetica, Arial, sans-serif" }}>
               <h4 style={{ margin: "0 0 12px 0", color: "#65676B", fontSize: "16px", fontWeight: "600" }}>Friend Requests</h4>
               {friendRequests.map((req) => (
                 <div key={req._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <img 
-                      src={req.profilePic || "https://via.placeholder.com/40"} 
-                      style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} 
-                      alt=""
-                    />
-                    <span style={{ fontWeight: "600", color: "#050505" }}>
+                  <div onClick={() => navigate(`/profile/${req._id}`)} style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+                    <img src={req.profilePic || "https://via.placeholder.com/40"} style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} alt=""/>
+                    <span style={{ fontWeight: "700", color: "#4C4C34", fontSize: "1.05rem" }}>
                       {req.username || "Someone"}{" "}
-                      <span style={{ fontWeight: "normal", color: "#65676B" }}>wants to be friends</span>
+                      <span style={{ fontWeight: "normal", color: "#65676B", fontSize: "0.95rem" }}>wants to be friends</span>
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button 
-                      onClick={() => handleAcceptFriend(req._id)}
-                      style={{ background: "#1877F2", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "0.9rem" }}
-                    >
-                      Confirm
-                    </button>
-                    <button 
-                      onClick={() => handleRejectFriend(req._id)}
-                      style={{ background: "#E4E6EB", color: "#050505", border: "none", padding: "8px 12px", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "0.9rem" }}
-                    >
-                      Delete
-                    </button>
+                    <button onClick={() => handleAcceptFriend(req._id)} style={{ background: "#1877F2", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "0.9rem" }}>Confirm</button>
+                    <button onClick={() => handleRejectFriend(req._id)} style={{ background: "#E4E6EB", color: "#050505", border: "none", padding: "8px 12px", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "0.9rem" }}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -328,18 +268,8 @@ export function ProfilePage() {
           )}
 
           {/* Posts Feed */}
-          <div
-            className="feed"
-            role="feed"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-              marginTop: "20px",
-            }}
-          >
-            {Array.isArray(posts) &&
-              posts.map((post) => <Post post={post} key={post._id || post.id} />)}
+          <div className="feed" role="feed" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "20px" }}>
+            {Array.isArray(posts) && posts.map((post) => <Post post={post} key={post._id || post.id} />)}
           </div>
         </div>
       </div>
