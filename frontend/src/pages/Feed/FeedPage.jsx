@@ -168,7 +168,7 @@ export function FeedPage() {
                   textAlign: "center",
                   border: "none"
                 }}>
-                  📸 Add Photo
+                  Add Image
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
                 </label>
 
