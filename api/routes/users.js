@@ -20,4 +20,13 @@ router.get(
   UsersController.getUserByUsername
 );
 
+// SEND FRIEND REQUEST
+router.post("/:id/friendRequest", tokenChecker, UsersController.sendFriendRequest);
+
+// ACCEPT FRIEND REQUEST
+router.post("/friendRequest/:requestId/accept", tokenChecker, UsersController.acceptFriendRequest);
+
+// REJECT FRIEND REQUEST
+router.post("/friendRequest/:requestId/reject", tokenChecker, UsersController.rejectFriendRequest);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const Post = require("../models/post");
 const { generateToken } = require("../lib/token");
 const User = require("../models/user");
+const Comment = require("../models/comment");
 
 async function getAllPosts(req, res) {
   try {
@@ -10,10 +11,24 @@ async function getAllPosts(req, res) {
 
     const validPosts = posts.filter((post) => post.user);
 
+    // Fetch comments for each valid post on the newsfeed
+    const postsWithComments = await Promise.all(
+      validPosts.map(async (post) => {
+        const comments = await Comment.find({ post: post._id })
+          .populate("user", "username profilePic")
+          .sort({ createdAt: 1 });
+
+        return {
+          ...post.toObject(),
+          comments: comments,
+        };
+      })
+    );
+
     const token = generateToken(req.user_id);
 
     res.status(200).json({
-      posts: validPosts,
+      posts: postsWithComments,
       token,
     });
   } catch (err) {
