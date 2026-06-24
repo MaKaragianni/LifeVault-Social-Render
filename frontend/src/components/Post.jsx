@@ -21,13 +21,44 @@ function Post({ post: initialPost }) {
     }
     if (initialPost) {
       setPost(initialPost);
+      setPostMessage(initialPost.message || "");
     }
   }, [initialPost]);
 
-  const handleUpdatePost = () => {
-    setPost({ ...post, message: postMessage });
+  const handleUpdatePost = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/posts/${post._id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: postMessage,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update post");
+    }
+
+    const data = await response.json();
+
+    setPost({
+      ...post,
+      message: data.post.message,
+    });
+
     setIsEditingPost(false);
-  };
+  } catch (err) {
+    console.error("Failed to update post:", err);
+  }
+};
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -106,15 +137,44 @@ function Post({ post: initialPost }) {
     }
   };
 
-  const handleSaveCommentEdit = (commentId) => {
+  const handleSaveCommentEdit = async (commentId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/posts/${post._id}/comments/${commentId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: editingCommentText,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update comment");
+    }
+
+    const data = await response.json();
+
     setComments(
       comments.map((c) =>
-        c._id === commentId ? { ...c, message: editingCommentText } : c
+        c._id === commentId
+          ? { ...c, message: data.comment.message }
+          : c
       )
     );
+
     setEditingCommentId(null);
     setEditingCommentText("");
-  };
+  } catch (err) {
+    console.error("Failed to update comment:", err);
+  }
+};
 
   return (
     <article

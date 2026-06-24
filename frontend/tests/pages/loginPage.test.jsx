@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
-import { useNavigate, MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { login } from "../../src/services/authentication";
 import { LoginPage } from "../../src/pages/Login/LoginPage";
 
@@ -17,17 +17,11 @@ if (typeof window !== "undefined" && !window.localStorage) {
   };
 }
 
-// Mocking the authentication service using a self-contained vi.fn()
+// Mocking the authentication service
 vi.mock("../../src/services/authentication", () => {
   return { login: vi.fn() };
 });
 
-// Mocking React Router's useNavigate function
-// vi.mock("react-router-dom", () => {
-//   const navigateMock = vi.fn();
-//   const useNavigateMock = () => navigateMock;
-//   return { useNavigate: useNavigateMock };
-// });
 const navigateMock = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -61,7 +55,7 @@ describe("Login Page", () => {
     login.mockResolvedValue({ token: "secrettoken123", userId: "user123" });
     render(
       <MemoryRouter>
-        <LoginPage/>
+        <LoginPage />
       </MemoryRouter>
     );
 
@@ -75,7 +69,7 @@ describe("Login Page", () => {
 
     render(
       <MemoryRouter>
-        <LoginPage/>
+        <LoginPage />
       </MemoryRouter>
     );
 
@@ -96,5 +90,17 @@ describe("Login Page", () => {
     await completeLoginForm();
 
     expect(navigateMock).toHaveBeenCalledWith("/login");
+  });
+
+  test("renders a Forgot Password link pointing to /forgot-password", () => {
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
+
+    const forgotLink = screen.getByRole("link", { name: /forgot password/i });
+    expect(forgotLink).toBeTruthy();
+    expect(forgotLink.getAttribute("href")).toBe("/forgot-password");
   });
 });

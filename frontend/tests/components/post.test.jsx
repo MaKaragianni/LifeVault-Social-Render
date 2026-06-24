@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi, beforeAll } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import Post from "../../src/components/Post";
@@ -65,9 +65,8 @@ describe("Post component", () => {
         {
           _id: "c1",
           user: { _id: "user-123", username: "TestUser" }, // matches localStorage userId
-          text: "my own comment",
-          likes: 0,
-          hasLikedComment: false,
+          message: "my own comment",
+          likes: [],
         },
       ],
     };
@@ -84,9 +83,8 @@ describe("Post component", () => {
         {
           _id: "c2",
           user: { _id: "third-party", username: "SomeoneElse" },
-          text: "not my comment",
-          likes: 0,
-          hasLikedComment: false,
+          message: "not my comment",
+          likes: [],
         },
       ],
     };
@@ -94,30 +92,52 @@ describe("Post component", () => {
     expect(screen.queryByText("Edit")).toBeNull();
   });
 
-  test("allows editing a comment and saving the new text", () => {
-    const testPost = {
-      _id: "p6",
-      message: "post",
-      user: { _id: "other-user", username: "OtherUser" },
-      comments: [
-        {
-          _id: "c3",
-          user: { _id: "user-123", username: "TestUser" },
-          text: "original text",
-          likes: 0,
-          hasLikedComment: false,
-        },
-      ],
-    };
-    renderPost(testPost);
+  test("allows editing a comment and saving the new text", async () => {
+  global.fetch = vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          comment: {
+            _id: "c3",
+            message: "updated text",
+          },
+        }),
+    })
+  );
 
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByDisplayValue("original text");
-    fireEvent.change(input, { target: { value: "updated text" } });
-    fireEvent.click(screen.getByText("Save"));
+  const testPost = {
+    _id: "p6",
+    message: "post",
+    user: { _id: "other-user", username: "OtherUser" },
+    comments: [
+      {
+        _id: "c3",
+        user: { _id: "user-123", username: "TestUser" },
+        message: "original text",
+        likes: [],
+      },
+    ],
+  };
 
+  renderPost(testPost);
+
+  fireEvent.click(screen.getByText("Edit"));
+
+  const input = screen.getByDisplayValue("original text");
+
+  fireEvent.change(input, {
+    target: { value: "updated text" },
+  });
+
+  fireEvent.click(screen.getByText("Save"));
+
+  await waitFor(() => {
     expect(screen.getByText("updated text")).toBeTruthy();
   });
+
+  expect(global.fetch).toHaveBeenCalled();
+});
 
   test("renders post image when provided", () => {
     const testPost = {
@@ -134,5 +154,56 @@ describe("Post component", () => {
     renderPost({ _id: "p8", message: "hello" });
     expect(screen.getByPlaceholderText("Add a comment...")).toBeTruthy();
     expect(screen.getByText("Send")).toBeTruthy();
+  });
+
+  test("shows like button on a comment with 0 likes", () => {
+    const testPost = {
+      _id: "p9",
+      message: "post",
+      comments: [
+        {
+          _id: "c4",
+          user: { _id: "other-user", username: "SomeUser" },
+          message: "a comment",
+          likes: [],
+        },
+      ],
+    };
+    renderPost(testPost);
+    expect(screen.getByText("👍 Like (0)")).toBeTruthy();
+  });
+
+  test("shows Liked state when current user has liked a comment", () => {
+    const testPost = {
+      _id: "p10",
+      message: "post",
+      comments: [
+        {
+          _id: "c5",
+          user: { _id: "other-user", username: "SomeUser" },
+          message: "liked comment",
+          likes: ["user-123"], // current user already liked it
+        },
+      ],
+    };
+    renderPost(testPost);
+    expect(screen.getByText("👍 Liked (1)")).toBeTruthy();
+  });
+
+  test("shows correct like count when multiple users liked a comment", () => {
+    const testPost = {
+      _id: "p11",
+      message: "post",
+      comments: [
+        {
+          _id: "c6",
+          user: { _id: "other-user", username: "SomeUser" },
+          message: "popular comment",
+          likes: ["other-user", "third-party", "fourth-user"],
+        },
+      ],
+    };
+    renderPost(testPost);
+    expect(screen.getByText("👍 Like (3)")).toBeTruthy();
   });
 });
