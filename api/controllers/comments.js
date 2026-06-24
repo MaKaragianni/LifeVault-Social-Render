@@ -59,4 +59,41 @@ async function toggleCommentLike(req, res) {
   }
 }
 
-module.exports = { createComment, toggleCommentLike };
+async function updateComment(req, res) {
+  try {
+    const { id: postId, commentId } = req.params;
+
+    const comment = await Comment.findOne({
+      _id: commentId,
+      post: postId,
+    });
+
+    if (!comment) {
+      return res.status(404).json({
+        message: "Comment not found",
+      });
+    }
+
+    if (comment.user.toString() !== req.user_id) {
+      return res.status(403).json({
+        message: "Not authorised",
+      });
+    }
+
+    comment.message = req.body.message;
+
+    await comment.save();
+
+    return res.status(200).json({
+      message: "Comment updated successfully",
+      comment,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Failed to update comment",
+    });
+  }
+}
+
+module.exports = { createComment, toggleCommentLike, updateComment };

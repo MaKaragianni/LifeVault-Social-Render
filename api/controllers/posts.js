@@ -93,4 +93,32 @@ async function toggleLike(req, res) {
   }
 };
 
-module.exports = { getAllPosts, createPost, toggleLike };
+async function updatePost(req, res) {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.user.toString() !== req.user_id) {
+      return res.status(403).json({ message: "Not authorised" });
+    }
+
+    post.message = req.body.message;
+
+    await post.save();
+
+    return res.status(200).json({
+      message: "Post updated successfully",
+      post,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Failed to update post",
+    });
+  }
+}
+
+module.exports = { getAllPosts, createPost, toggleLike, updatePost };

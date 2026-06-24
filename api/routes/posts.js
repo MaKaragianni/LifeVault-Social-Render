@@ -8,8 +8,10 @@ const tokenChecker = require("../middleware/tokenChecker");
 router.get("/", PostsController.getAllPosts);
 router.post("/", PostsController.createPost);
 router.post("/:id/like", PostsController.toggleLike);
+router.put("/:id", tokenChecker, PostsController.updatePost);
 
 router.post("/:id/comments", tokenChecker, CommentsController.createComment);
 router.post("/:id/comments/:commentId/like", tokenChecker, CommentsController.toggleCommentLike);
+router.put("/:id/comments/:commentId", tokenChecker, CommentsController.updateComment);
 
 module.exports = router;

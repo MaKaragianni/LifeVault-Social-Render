@@ -192,3 +192,40 @@ describe("/posts/:id/comments", () => {
     });
   });
 });
+
+describe("PUT /:id/comments/:commentId", () => {
+  let comment;
+
+  beforeEach(async () => {
+    comment = await Comment.create({
+      message: "Original comment",
+      user: user._id,
+      post: post._id,
+    });
+  });
+
+  test("updates a comment", async () => {
+    const response = await request(app)
+      .put(`/posts/${post._id}/comments/${comment._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        message: "Updated comment",
+      });
+
+    expect(response.status).toEqual(200);
+    expect(response.body.comment.message).toEqual("Updated comment");
+  });
+
+  test("persists comment updates to the database", async () => {
+    await request(app)
+      .put(`/posts/${post._id}/comments/${comment._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        message: "Persisted update",
+      });
+
+    const updated = await Comment.findById(comment._id);
+
+    expect(updated.message).toEqual("Persisted update");
+  });
+});

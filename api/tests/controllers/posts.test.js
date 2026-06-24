@@ -191,3 +191,40 @@ describe("/posts", () => {
     });
   });
 });
+
+describe("PUT /posts/:id", () => {
+  test("updates a post", async () => {
+    const post = await Post.create({
+      message: "Original post",
+      user: user._id,
+    });
+
+    const response = await request(app)
+      .put(`/posts/${post._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        message: "Updated post",
+      });
+
+    expect(response.status).toEqual(200);
+    expect(response.body.post.message).toEqual("Updated post");
+  });
+
+  test("persists post updates to the database", async () => {
+    const post = await Post.create({
+      message: "Original post",
+      user: user._id,
+    });
+
+    await request(app)
+      .put(`/posts/${post._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        message: "Persisted update",
+      });
+
+    const updated = await Post.findById(post._id);
+
+    expect(updated.message).toEqual("Persisted update");
+  });
+});
