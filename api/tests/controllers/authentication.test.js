@@ -1,5 +1,6 @@
 const app = require("../../app");
 const supertest = require("supertest");
+const bcrypt = require("bcryptjs");
 
 require("../mongodb_helper");
 
@@ -9,9 +10,13 @@ describe("/tokens", () => {
   beforeAll(async () => {
     await User.deleteMany({});
 
+    // Pre-hash the password exactly as the controller does, so bcrypt.compare
+    // succeeds when the login endpoint is called with the plain-text value.
+    const hashedPassword = await bcrypt.hash("12345678", 10);
+
     await User.create({
       email: "auth-test@test.com",
-      password: "12345678",
+      password: hashedPassword,
       username: "authuser",
       dateOfBirth: new Date("1995-01-01"),
     });
