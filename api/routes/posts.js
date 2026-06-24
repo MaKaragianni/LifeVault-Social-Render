@@ -10,5 +10,6 @@ router.post("/", PostsController.createPost);
 router.post("/:id/like", PostsController.toggleLike);
 
 router.post("/:id/comments", tokenChecker, CommentsController.createComment);
+router.post("/:id/comments/:commentId/like", tokenChecker, CommentsController.toggleCommentLike);
 
 module.exports = router;

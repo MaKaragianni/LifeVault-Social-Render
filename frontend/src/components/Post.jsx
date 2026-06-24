@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import LikeButton from "./likeButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Post({ post: initialPost }) {
   const navigate = useNavigate();
@@ -14,6 +14,15 @@ function Post({ post: initialPost }) {
   const [newCommentText, setNewCommentText] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
+
+  useEffect(() => {
+    if (initialPost && initialPost.comments) {
+      setComments(initialPost.comments);
+    }
+    if (initialPost) {
+      setPost(initialPost);
+    }
+  }, [initialPost]);
 
   const handleUpdatePost = () => {
     setPost({ ...post, message: postMessage });
@@ -39,8 +48,7 @@ function Post({ post: initialPost }) {
         const data = await res.json();
         const backendCommentWithUserObj = {
           ...data.comment,
-          likesCount: 0,
-          userHasLiked: false,
+          likes: [], 
           user: {
             _id: currentUserId,
             username: localStorage.getItem("username") || "Me",
@@ -58,14 +66,16 @@ function Post({ post: initialPost }) {
     setComments(prevComments =>
       prevComments.map((c) => {
         if (c._id === commentId) {
-          const currentLikedStatus = c.userHasLiked || false;
-          let currentCount = typeof c.likes === "number" ? c.likes : (c.likesCount || 0);
+          const currentLikesArray = Array.isArray(c.likes) ? c.likes : [];
+          const hasLiked = currentLikesArray.includes(currentUserId);
           
+          const updatedLikes = hasLiked
+            ? currentLikesArray.filter(id => id !== currentUserId)
+            : [...currentLikesArray, currentUserId];
+
           return {
             ...c,
-            likes: currentLikedStatus ? Math.max(0, currentCount - 1) : currentCount + 1,
-            likesCount: currentLikedStatus ? Math.max(0, currentCount - 1) : currentCount + 1,
-            userHasLiked: !currentLikedStatus,
+            likes: updatedLikes
           };
         }
         return c;
@@ -75,15 +85,24 @@ function Post({ post: initialPost }) {
     try {
       const token = localStorage.getItem("token");
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
-      await fetch(`${API_BASE}/posts/${post._id}/comments/${commentId}/like`, {
+      const res = await fetch(`${API_BASE}/posts/${post._id}/comments/${commentId}/like`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.comment || data.likes) {
+          setComments(prev => prev.map(c => 
+            c._id === commentId ? { ...c, likes: data.comment?.likes || data.likes } : c
+          ));
+        }
+      }
     } catch (err) {
-      console.error("Database like background synchronization delayed:", err);
+      console.error("Database comment like sync error:", err);
     }
   };
 
@@ -110,11 +129,11 @@ function Post({ post: initialPost }) {
         marginBottom: "20px",
       }}
     >
-      {/* Header Container Layout */}
+      {/* Header Alignment */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "space-between", 
           alignItems: "center",
           marginBottom: "14px",
           width: "100%"
@@ -203,11 +222,9 @@ function Post({ post: initialPost }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {comments.map((comment) => {
-            const displayLikesTotal = typeof comment.likes === "number" 
-              ? comment.likes 
-              : (comment.likesCount || (Array.isArray(comment.likes) ? comment.likes.length : 0));
-
-            const activeLikedState = comment.userHasLiked || false;
+            const likesList = Array.isArray(comment.likes) ? comment.likes : [];
+            const userHasLikedComment = likesList.includes(currentUserId);
+            const totalLikesCount = likesList.length;
 
             return (
               <div key={comment._id} style={{ fontSize: "0.9rem", borderBottom: "1px solid #f3f0ec", paddingBottom: "8px" }}>
@@ -249,17 +266,17 @@ function Post({ post: initialPost }) {
                     background: "none",
                     border: "none",
                     fontSize: "0.8rem",
-                    color: activeLikedState ? "#2e7d32" : "#777",
+                    color: userHasLikedComment ? "#2e7d32" : "#777",
                     cursor: "pointer",
                     padding: 0,
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
                     marginTop: "4px",
-                    fontWeight: activeLikedState ? "bold" : "normal"
+                    fontWeight: userHasLikedComment ? "bold" : "normal"
                   }}
                 >
-                  {activeLikedState ? "👍 Liked" : "👍 Like"} ({displayLikesTotal})
+                  {userHasLikedComment ? "👍 Liked" : "👍 Like"} ({totalLikesCount})
                 </button>
               </div>
             );

@@ -14,14 +14,49 @@ async function createComment(req, res) {
       message: message,
       user: userId,
       post: postId,
+      likes: [],
     });
 
     await newComment.save();
-    res.status(201).json({ message: "Comment created successfully", comment: newComment });
+
+    // Populate user so the frontend receives username immediately
+    const populated = await newComment.populate("user", "username profilePic");
+
+    res.status(201).json({ message: "Comment created successfully", comment: populated });
   } catch (err) {
     console.error("Error creating comment:", err);
     res.status(500).json({ message: "Failed to create comment" });
   }
 }
 
-module.exports = { createComment };
+async function toggleCommentLike(req, res) {
+  try {
+    const { id: postId, commentId } = req.params;
+    const userId = req.user_id;
+
+    const comment = await Comment.findOne({ _id: commentId, post: postId });
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const alreadyLiked = comment.likes.some(
+      (likeId) => likeId.toString() === userId
+    );
+
+    if (alreadyLiked) {
+      comment.likes.pull(userId);
+    } else {
+      comment.likes.push(userId);
+    }
+
+    await comment.save();
+
+    return res.status(200).json({ comment: { ...comment.toObject() } });
+  } catch (err) {
+    console.error("Error toggling comment like:", err);
+    res.status(500).json({ message: "Failed to like comment" });
+  }
+}
+
+module.exports = { createComment, toggleCommentLike };

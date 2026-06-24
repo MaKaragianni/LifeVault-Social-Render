@@ -47,9 +47,9 @@ export function LoginPage() {
             className="auth-input"
           />
 
-          <button 
+          <button
             role="submit-button"
-            type="submit" 
+            type="submit"
             className="btn btn-primary auth-submit"
           >
             Log In
@@ -57,7 +57,11 @@ export function LoginPage() {
         </form>
 
         <p className="auth-switch">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </p>
+
+        <p className="auth-switch">
+          Don&apos;t have an account? <Link to="/signup">Sign up</Link>
         </p>
       </div>
     </div>
