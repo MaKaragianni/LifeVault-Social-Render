@@ -1,5 +1,4 @@
 services:
-# 1. The Express Backend API (Web Service Server)
   - type: web
     name: lifevault-api
     env: node
@@ -11,17 +10,16 @@ services:
       - key: NODE_VERSION
         value: 20.0.0
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: MONGODB_URL
-        value: mongodb+srv://mariakaragianni89_db_user:NBPH6Ogm2chNDiBh@cluster0.fja6k8d.mongodb.net/?appName=Cluster0
+        sync: false
       - key: CLOUDINARY_CLOUD_NAME
-        value: dg1scdvos
+        sync: false
       - key: CLOUDINARY_API_KEY
-        value: 728344185463611
+        sync: false
       - key: CLOUDINARY_API_SECRET
-        value: 1GJzquxziMGiE3pZb03_p5Hed1EG
+        sync: false
 
-# 2. The Vite React Frontend (Static CDN Site)
   - type: web
     name: lifevault-frontend
     runtime: static
