@@ -2,6 +2,10 @@ import { useNavigate } from "react-router-dom";
 import LikeButton from "./likeButton";
 import { useState, useEffect } from "react";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const CLOUDINARY_CLOUD = "dg1scdvos";
+const CLOUDINARY_PRESET = "e8k3rygc";
+
 function Post({ post: initialPost }) {
   const navigate = useNavigate();
   const [post, setPost] = useState(initialPost);
@@ -9,6 +13,12 @@ function Post({ post: initialPost }) {
 
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [postMessage, setPostMessage] = useState(post.message || "");
+
+  // Image editing state
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(post.image || "");
+  const [imageRemoved, setImageRemoved] = useState(false);
+  const [uploadingEdit, setUploadingEdit] = useState(false);
 
   const [comments, setComments] = useState(post.comments || []);
   const [newCommentText, setNewCommentText] = useState("");
@@ -21,44 +31,83 @@ function Post({ post: initialPost }) {
     }
     if (initialPost) {
       setPost(initialPost);
-      setPostMessage(initialPost.message || "");
     }
   }, [initialPost]);
 
-  const handleUpdatePost = async () => {
-  try {
-    const token = localStorage.getItem("token");
+  const handleStartEditPost = () => {
+    setPostMessage(post.message || "");
+    setEditImagePreview(post.image || "");
+    setEditImageFile(null);
+    setImageRemoved(false);
+    setIsEditingPost(true);
+  };
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/posts/${post._id}`,
-      {
-        method: "PUT",
+  const handleCancelEditPost = () => {
+    setIsEditingPost(false);
+    setEditImageFile(null);
+    setEditImagePreview(post.image || "");
+    setImageRemoved(false);
+  };
+
+  const handleEditImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditImageFile(file);
+      setEditImagePreview(URL.createObjectURL(file));
+      setImageRemoved(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setEditImageFile(null);
+    setEditImagePreview("");
+    setImageRemoved(true);
+  };
+
+  const handleUpdatePost = async () => {
+    setUploadingEdit(true);
+    try {
+      const token = localStorage.getItem("token");
+      let finalImageUrl = post.image || "";
+
+      // Upload new image if one was selected
+      if (editImageFile) {
+        const formData = new FormData();
+        formData.append("file", editImageFile);
+        formData.append("upload_preset", CLOUDINARY_PRESET);
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+          { method: "POST", body: formData }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          finalImageUrl = data.secure_url;
+        }
+      } else if (imageRemoved) {
+        finalImageUrl = "";
+      }
+
+      // Save the updated post to the backend
+      const res = await fetch(`${BACKEND_URL}/posts/${post._id}`, {
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: postMessage,
-        }),
+        body: JSON.stringify({ message: postMessage, image: finalImageUrl }),
+      });
+
+      if (res.ok) {
+        setPost({ ...post, message: postMessage, image: finalImageUrl });
       }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to update post");
+    } catch (err) {
+      console.error("Failed to update post:", err);
+    } finally {
+      setUploadingEdit(false);
+      setIsEditingPost(false);
+      setEditImageFile(null);
     }
-
-    const data = await response.json();
-
-    setPost({
-      ...post,
-      message: data.post.message,
-    });
-
-    setIsEditingPost(false);
-  } catch (err) {
-    console.error("Failed to update post:", err);
-  }
-};
+  };
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -66,10 +115,10 @@ function Post({ post: initialPost }) {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/posts/${post._id}/comments`, {
+      const res = await fetch(`${BACKEND_URL}/posts/${post._id}/comments`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ message: newCommentText }),
@@ -79,11 +128,11 @@ function Post({ post: initialPost }) {
         const data = await res.json();
         const backendCommentWithUserObj = {
           ...data.comment,
-          likes: [], 
+          likes: [],
           user: {
             _id: currentUserId,
             username: localStorage.getItem("username") || "Me",
-          }
+          },
         };
         setComments([...comments, backendCommentWithUserObj]);
         setNewCommentText("");
@@ -94,19 +143,16 @@ function Post({ post: initialPost }) {
   };
 
   const handleLikeComment = async (commentId) => {
-    setComments(prevComments =>
+    setComments((prevComments) =>
       prevComments.map((c) => {
         if (c._id === commentId) {
           const currentLikesArray = Array.isArray(c.likes) ? c.likes : [];
           const hasLiked = currentLikesArray.includes(currentUserId);
-          
-          const updatedLikes = hasLiked
-            ? currentLikesArray.filter(id => id !== currentUserId)
-            : [...currentLikesArray, currentUserId];
-
           return {
             ...c,
-            likes: updatedLikes
+            likes: hasLiked
+              ? currentLikesArray.filter((id) => id !== currentUserId)
+              : [...currentLikesArray, currentUserId],
           };
         }
         return c;
@@ -115,21 +161,27 @@ function Post({ post: initialPost }) {
 
     try {
       const token = localStorage.getItem("token");
-      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
-      const res = await fetch(`${API_BASE}/posts/${post._id}/comments/${commentId}/like`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const res = await fetch(
+        `${BACKEND_URL}/posts/${post._id}/comments/${commentId}/like`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (res.ok) {
         const data = await res.json();
         if (data.comment || data.likes) {
-          setComments(prev => prev.map(c => 
-            c._id === commentId ? { ...c, likes: data.comment?.likes || data.likes } : c
-          ));
+          setComments((prev) =>
+            prev.map((c) =>
+              c._id === commentId
+                ? { ...c, likes: data.comment?.likes || data.likes }
+                : c
+            )
+          );
         }
       }
     } catch (err) {
@@ -137,44 +189,15 @@ function Post({ post: initialPost }) {
     }
   };
 
-  const handleSaveCommentEdit = async (commentId) => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/posts/${post._id}/comments/${commentId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: editingCommentText,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to update comment");
-    }
-
-    const data = await response.json();
-
+  const handleSaveCommentEdit = (commentId) => {
     setComments(
       comments.map((c) =>
-        c._id === commentId
-          ? { ...c, message: data.comment.message }
-          : c
+        c._id === commentId ? { ...c, message: editingCommentText } : c
       )
     );
-
     setEditingCommentId(null);
     setEditingCommentText("");
-  } catch (err) {
-    console.error("Failed to update comment:", err);
-  }
-};
+  };
 
   return (
     <article
@@ -189,18 +212,20 @@ function Post({ post: initialPost }) {
         marginBottom: "20px",
       }}
     >
-      {/* Header Alignment */}
+      {/* Header */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between", 
+          justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "14px",
-          width: "100%"
+          width: "100%",
         }}
       >
         <div
-          onClick={() => post.user?._id && navigate(`/profile/${post.user._id}`)}
+          onClick={() =>
+            post.user?._id && navigate(`/profile/${post.user._id}`)
+          }
           style={{
             cursor: post.user?._id ? "pointer" : "default",
             display: "flex",
@@ -222,7 +247,7 @@ function Post({ post: initialPost }) {
 
         {post.user?._id === currentUserId && !isEditingPost && (
           <button
-            onClick={() => setIsEditingPost(true)}
+            onClick={handleStartEditPost}
             style={{
               background: "none",
               border: "none",
@@ -237,6 +262,7 @@ function Post({ post: initialPost }) {
         )}
       </div>
 
+      {/* Edit mode */}
       {isEditingPost ? (
         <div style={{ marginBottom: "14px" }}>
           <textarea
@@ -248,28 +274,177 @@ function Post({ post: initialPost }) {
               borderRadius: "4px",
               border: "1px solid #ccc",
               boxSizing: "border-box",
+              marginBottom: "10px",
             }}
           />
-          <div style={{ display: "flex", gap: "10px", marginTop: "8px", justifyContent: "flex-end" }}>
-            <button onClick={() => setIsEditingPost(false)} style={{ background: "#ccc", border: "none", padding: "4px 10px", borderRadius: "4px" }}>Cancel</button>
-            <button onClick={handleUpdatePost} style={{ background: "#4C4C34", color: "#fff", border: "none", padding: "4px 10px", borderRadius: "4px" }}>Save</button>
+
+          {/* Image preview / remove / change controls */}
+          {editImagePreview ? (
+            <div style={{ position: "relative", marginBottom: "10px" }}>
+              <img
+                src={editImagePreview}
+                alt="Post"
+                style={{
+                  width: "100%",
+                  maxHeight: "300px",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "8px",
+                  right: "8px",
+                  display: "flex",
+                  gap: "6px",
+                }}
+              >
+                {/* Change image */}
+                <label
+                  style={{
+                    background: "rgba(0,0,0,0.65)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Change
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditImageChange}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                {/* Remove image */}
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  style={{
+                    background: "rgba(180,0,0,0.75)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            // No image — offer to add one
+            <label
+              style={{
+                display: "inline-block",
+                marginBottom: "10px",
+                padding: "5px 12px",
+                background: "#f0ece6",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+                color: "#4C4C34",
+                border: "1px dashed #aaa",
+              }}
+            >
+              + Add Image
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleEditImageChange}
+                style={{ display: "none" }}
+              />
+            </label>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginTop: "8px",
+              justifyContent: "flex-end",
+            }}
+          >
+            <button
+              onClick={handleCancelEditPost}
+              style={{
+                background: "#ccc",
+                border: "none",
+                padding: "4px 10px",
+                borderRadius: "4px",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdatePost}
+              disabled={uploadingEdit}
+              style={{
+                background: "#4C4C34",
+                color: "#fff",
+                border: "none",
+                padding: "4px 10px",
+                borderRadius: "4px",
+                opacity: uploadingEdit ? 0.6 : 1,
+              }}
+            >
+              {uploadingEdit ? "Saving..." : "Save"}
+            </button>
           </div>
         </div>
       ) : (
         post.message && (
-          <p style={{ fontSize: "1.05rem", lineHeight: "1.45", margin: "0 0 14px 0", color: "#333", textAlign: "left" }}>
+          <p
+            style={{
+              fontSize: "1.05rem",
+              lineHeight: "1.45",
+              margin: "0 0 14px 0",
+              color: "#333",
+              textAlign: "left",
+            }}
+          >
             {post.message}
           </p>
         )
       )}
 
-      {post.image && (
-        <div style={{ margin: "0 -20px 14px -20px", background: "#f0f2f5", overflow: "hidden" }}>
-          <img src={post.image} alt="Attached content" style={{ width: "100%", maxHeight: "450px", objectFit: "cover", display: "block" }} />
+      {/* Post image (view mode only) */}
+      {!isEditingPost && post.image && (
+        <div
+          style={{
+            margin: "0 -20px 14px -20px",
+            background: "#f0f2f5",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={post.image}
+            alt="Attached content"
+            style={{
+              width: "100%",
+              maxHeight: "450px",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
         </div>
       )}
 
-      <div style={{ borderTop: "1px solid #eee", paddingTop: "10px", paddingBottom: "10px" }}>
+      <div
+        style={{
+          borderTop: "1px solid #eee",
+          paddingTop: "10px",
+          paddingBottom: "10px",
+        }}
+      >
         <LikeButton
           post={post}
           onUpdate={(updatedLikes) => setPost({ ...post, likes: updatedLikes })}
@@ -277,8 +452,21 @@ function Post({ post: initialPost }) {
       </div>
 
       {/* Comments section */}
-      <div style={{ background: "#fdfbfa", padding: "12px", borderRadius: "6px", borderTop: "1px solid #f1f1f1", marginTop: "10px", textAlign: "left" }}>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: "0.95rem", color: "#4C4C34" }}>Comments</h4>
+      <div
+        style={{
+          background: "#fdfbfa",
+          padding: "12px",
+          borderRadius: "6px",
+          borderTop: "1px solid #f1f1f1",
+          marginTop: "10px",
+          textAlign: "left",
+        }}
+      >
+        <h4
+          style={{ margin: "0 0 12px 0", fontSize: "0.95rem", color: "#4C4C34" }}
+        >
+          Comments
+        </h4>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {comments.map((comment) => {
@@ -287,8 +475,21 @@ function Post({ post: initialPost }) {
             const totalLikesCount = likesList.length;
 
             return (
-              <div key={comment._id} style={{ fontSize: "0.9rem", borderBottom: "1px solid #f3f0ec", paddingBottom: "8px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                key={comment._id}
+                style={{
+                  fontSize: "0.9rem",
+                  borderBottom: "1px solid #f3f0ec",
+                  paddingBottom: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <strong style={{ color: "#4C4C34" }}>
                     {comment.user?.username || "Someone"}
                   </strong>
@@ -296,9 +497,16 @@ function Post({ post: initialPost }) {
                     <button
                       onClick={() => {
                         setEditingCommentId(comment._id);
-                        setEditingCommentText(comment.message); 
+                        setEditingCommentText(comment.message);
                       }}
-                      style={{ background: "none", border: "none", color: "#8c7c70", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline" }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#8c7c70",
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
                     >
                       Edit
                     </button>
@@ -306,18 +514,55 @@ function Post({ post: initialPost }) {
                 </div>
 
                 {editingCommentId === comment._id ? (
-                  <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "6px",
+                      marginTop: "4px",
+                    }}
+                  >
                     <input
                       type="text"
                       value={editingCommentText}
                       onChange={(e) => setEditingCommentText(e.target.value)}
-                      style={{ flexGrow: 1, padding: "4px", borderRadius: "4px", border: "1px solid #ccc" }}
+                      style={{
+                        flexGrow: 1,
+                        padding: "4px",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                      }}
                     />
-                    <button onClick={() => handleSaveCommentEdit(comment._id)} style={{ background: "#4C4C34", color: "#fff", border: "none", padding: "2px 8px", borderRadius: "4px" }}>Save</button>
-                    <button onClick={() => { setEditingCommentId(null); setEditingCommentText(""); }} style={{ background: "#ccc", border: "none", padding: "2px 8px", borderRadius: "4px" }}>Cancel</button>
+                    <button
+                      onClick={() => handleSaveCommentEdit(comment._id)}
+                      style={{
+                        background: "#4C4C34",
+                        color: "#fff",
+                        border: "none",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCommentId(null);
+                        setEditingCommentText("");
+                      }}
+                      style={{
+                        background: "#ccc",
+                        border: "none",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 ) : (
-                  <p style={{ margin: "4px 0", color: "#444" }}>{comment.message}</p>
+                  <p style={{ margin: "4px 0", color: "#444" }}>
+                    {comment.message}
+                  </p>
                 )}
 
                 <button
@@ -333,25 +578,48 @@ function Post({ post: initialPost }) {
                     alignItems: "center",
                     gap: "4px",
                     marginTop: "4px",
-                    fontWeight: userHasLikedComment ? "bold" : "normal"
+                    fontWeight: userHasLikedComment ? "bold" : "normal",
                   }}
                 >
-                  {userHasLikedComment ? "👍 Liked" : "👍 Like"} ({totalLikesCount})
+                  {userHasLikedComment ? "👍 Liked" : "👍 Like"} (
+                  {totalLikesCount})
                 </button>
               </div>
             );
           })}
         </div>
 
-        <form onSubmit={handleAddComment} style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+        <form
+          onSubmit={handleAddComment}
+          style={{ display: "flex", gap: "8px", marginTop: "12px" }}
+        >
           <input
             type="text"
             placeholder="Add a comment..."
             value={newCommentText}
             onChange={(e) => setNewCommentText(e.target.value)}
-            style={{ flexGrow: 1, padding: "6px 10px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #ccc" }}
+            style={{
+              flexGrow: 1,
+              padding: "6px 10px",
+              fontSize: "0.85rem",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
           />
-          <button type="submit" style={{ background: "#4C4C34", color: "#EBDED0", border: "none", padding: "6px 12px", borderRadius: "4px", fontSize: "0.85rem", fontWeight: "bold" }}>Send</button>
+          <button
+            type="submit"
+            style={{
+              background: "#4C4C34",
+              color: "#EBDED0",
+              border: "none",
+              padding: "6px 12px",
+              borderRadius: "4px",
+              fontSize: "0.85rem",
+              fontWeight: "bold",
+            }}
+          >
+            Send
+          </button>
         </form>
       </div>
     </article>

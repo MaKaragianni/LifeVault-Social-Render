@@ -11,7 +11,6 @@ async function getAllPosts(req, res) {
 
     const validPosts = posts.filter((post) => post.user);
 
-    // Fetch comments for each valid post on the newsfeed
     const postsWithComments = await Promise.all(
       validPosts.map(async (post) => {
         const comments = await Comment.find({ post: post._id })
@@ -33,10 +32,7 @@ async function getAllPosts(req, res) {
     });
   } catch (err) {
     console.error(err);
-
-    res.status(500).json({
-      message: "Failed to fetch posts",
-    });
+    res.status(500).json({ message: "Failed to fetch posts" });
   }
 }
 
@@ -58,10 +54,34 @@ async function createPost(req, res) {
     });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: "Failed to create post" });
+  }
+}
 
-    res.status(500).json({
-      message: "Failed to create post",
-    });
+async function updatePost(req, res) {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Only the post owner can edit
+    if (post.user.toString() !== req.user_id) {
+      return res.status(403).json({ message: "Not authorised to edit this post" });
+    }
+
+    if (req.body.message !== undefined) post.message = req.body.message;
+    if (req.body.image !== undefined) post.image = req.body.image;
+
+    await post.save();
+
+    const token = generateToken(req.user_id);
+
+    res.status(200).json({ message: "Post updated", token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to update post" });
   }
 }
 
@@ -70,7 +90,7 @@ async function toggleLike(req, res) {
     const post = await Post.findById(req.params.id);
 
     if (!post) {
-      return res.status(404).json ({message: "Post not found"});
+      return res.status(404).json({ message: "Post not found" });
     }
 
     const alreadyLiked = post.likes.some(
@@ -86,39 +106,10 @@ async function toggleLike(req, res) {
     await post.save();
 
     return res.status(200).json({ likes: post.likes });
-
-    } catch (err) {
-    console.error(err);
-    res.status(500).json({message: "Failed to like post"});
-  }
-};
-
-async function updatePost(req, res) {
-  try {
-    const post = await Post.findById(req.params.id);
-
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-
-    if (post.user.toString() !== req.user_id) {
-      return res.status(403).json({ message: "Not authorised" });
-    }
-
-    post.message = req.body.message;
-
-    await post.save();
-
-    return res.status(200).json({
-      message: "Post updated successfully",
-      post,
-    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      message: "Failed to update post",
-    });
+    res.status(500).json({ message: "Failed to like post" });
   }
 }
 
-module.exports = { getAllPosts, createPost, toggleLike, updatePost };
+module.exports = { getAllPosts, createPost, updatePost, toggleLike };
