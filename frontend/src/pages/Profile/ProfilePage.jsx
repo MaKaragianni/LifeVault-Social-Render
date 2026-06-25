@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Post from "../../components/Post";
 import Navbar from "../../components/Navbar";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
 export function ProfilePage() {
   const { id } = useParams();
