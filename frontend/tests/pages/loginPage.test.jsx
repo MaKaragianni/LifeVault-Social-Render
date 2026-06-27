@@ -78,8 +78,8 @@ describe("Login Page", () => {
     expect(navigateMock).toHaveBeenCalledWith("/posts");
   });
 
-  test("navigates to /login on unsuccessful login", async () => {
-    login.mockRejectedValue(new Error("Error logging in"));
+  test("shows 'User not found' error when email does not exist", async () => {
+    login.mockRejectedValue(new Error("User not found"));
 
     render(
       <MemoryRouter>
@@ -89,7 +89,21 @@ describe("Login Page", () => {
 
     await completeLoginForm();
 
-    expect(navigateMock).toHaveBeenCalledWith("/login");
+    expect(screen.getByText("User not found")).toBeTruthy();
+  });
+
+  test("shows 'Password incorrect' error when password is wrong", async () => {
+    login.mockRejectedValue(new Error("Password incorrect"));
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
+
+    await completeLoginForm();
+
+    expect(screen.getByText("Password incorrect")).toBeTruthy();
   });
 
   test("renders a Forgot Password link pointing to /forgot-password", () => {

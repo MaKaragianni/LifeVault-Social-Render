@@ -7,10 +7,12 @@ import "./LoginPage.css";
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
     try {
       const data = await login(email, password);
       localStorage.setItem("token", data.token);
@@ -18,7 +20,7 @@ export function LoginPage() {
       navigate("/posts");
     } catch (err) {
       console.error(err);
-      navigate("/login");
+      setError(err.message || "Login failed. Please try again.");
     }
   }
 
@@ -27,6 +29,8 @@ export function LoginPage() {
       <div className="auth-card">
         <img src={logo} alt="logo" className="auth-logo" />
         <h2>Log In</h2>
+
+        {error && <p className="auth-error">{error}</p>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="email">Email:</label>

@@ -86,18 +86,58 @@ describe("Signup Page", () => {
     expect(navigateMock).toHaveBeenCalledWith("/login");
   });
 
-  test("navigates to /signup on unsuccessful signup", async () => {
+  test("shows an error when email is already in use", async () => {
     render(
       <MemoryRouter>
         <SignupPage />
       </MemoryRouter>
     );
 
-    signup.mockRejectedValue(new Error("Error signing up"));
-    const navigateMock = useNavigate();
+    signup.mockRejectedValue(new Error("This email is already in use."));
 
     await completeSignupForm(fakeFile);
-    expect(navigateMock).toHaveBeenCalledWith("/signup");
+
+    expect(screen.getByText("This email is already in use.")).toBeTruthy();
+  });
+
+  test("shows an error when username is already taken", async () => {
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
+
+    signup.mockRejectedValue(new Error("This username is already taken."));
+
+    await completeSignupForm(fakeFile);
+
+    expect(screen.getByText("This username is already taken.")).toBeTruthy();
+  });
+
+  test("prevents signup and shows error for users under 16", async () => {
+    render(
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    );
+
+    const user = userEvent.setup();
+    const emailInputEl = screen.getByLabelText("Email");
+    const passwordInputEl = screen.getByLabelText("Password");
+    const confirmPasswordInputEl = screen.getByLabelText("Confirm Password");
+    const usernameInputEl = screen.getByLabelText("Username");
+    const dobInputEl = screen.getByLabelText("Date of Birth");
+    const submitButtonEl = screen.getByRole("submit-button");
+
+    await user.type(emailInputEl, "young@email.com");
+    await user.type(passwordInputEl, "Hello14!");
+    await user.type(confirmPasswordInputEl, "Hello14!");
+    await user.type(usernameInputEl, "younguser");
+    await user.type(dobInputEl, "2015-01-01");
+    await user.click(submitButtonEl);
+
+    expect(screen.getByText("You must be at least 16 years old to create an account.")).toBeTruthy();
+    expect(signup).not.toHaveBeenCalled();
   });
 
   test("When user types password with no capital letter, no special char or no number, error occurs.", async () => {

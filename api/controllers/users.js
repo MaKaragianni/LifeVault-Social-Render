@@ -45,6 +45,15 @@ async function create(req, res) {
     res.status(201).json({ message: "OK" });
   } catch (err) {
     console.error(err);
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      if (field === "email") {
+        return res.status(400).json({ message: "This email is already in use." });
+      }
+      if (field === "username") {
+        return res.status(400).json({ message: "This username is already taken." });
+      }
+    }
     res.status(400).json({ message: "Something went wrong" });
   }
 }

@@ -16,6 +16,22 @@ export function SignupPage() {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const navigate = useNavigate();
 
+  function validateAge(dateOfBirth) {
+    if (!dateOfBirth) return true; // if not provided, let server handle it
+    const today = new Date();
+    const dob = new Date(dateOfBirth);
+    const age = today.getFullYear() - dob.getFullYear();
+    const hadBirthdayThisYear =
+      today.getMonth() > dob.getMonth() ||
+      (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
+    const actualAge = hadBirthdayThisYear ? age : age - 1;
+    if (actualAge < 16) {
+      setError("You must be at least 16 years old to create an account.");
+      return false;
+    }
+    return true;
+  }
+
   function validatePassword(password) {
     const pattern =
       /(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[0-9])/;
@@ -44,6 +60,7 @@ export function SignupPage() {
     event.preventDefault();
 
     if (
+      validateAge(dateOfBirth) &&
       validatePassword(password) &&
       matchPasswords(password, confirmPassword)
     ) {
@@ -54,7 +71,6 @@ export function SignupPage() {
       } catch (err) {
         console.error(err);
         setError(err.message || "Something went wrong during signup.");
-        navigate("/signup");
       }
     }
   }

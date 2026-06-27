@@ -22,8 +22,9 @@ export async function login(email, password) {
     let data = await response.json();
     return data;
   } else {
+    const errorData = await response.json().catch(() => ({}));
     throw new Error(
-      `Received status ${response.status} when logging in. Expected 201`
+      errorData.message || `Received status ${response.status} when logging in. Expected 201`
     );
   }
 }
