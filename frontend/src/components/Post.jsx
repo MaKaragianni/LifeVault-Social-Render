@@ -189,7 +189,7 @@ function Post({ post: initialPost }) {
     }
   };
 
-  const handleSaveCommentEdit = (commentId) => {
+  const handleSaveCommentEdit = async (commentId) => {
     setComments(
       comments.map((c) =>
         c._id === commentId ? { ...c, message: editingCommentText } : c
@@ -197,6 +197,27 @@ function Post({ post: initialPost }) {
     );
     setEditingCommentId(null);
     setEditingCommentText("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${BACKEND_URL}/posts/${post._id}/comments/${commentId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: editingCommentText }),
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to save comment edit");
+      }
+    } catch (err) {
+      console.error("Error saving comment edit:", err);
+    }
   };
 
   return (

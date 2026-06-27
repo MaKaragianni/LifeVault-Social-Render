@@ -18,7 +18,6 @@ export default function Navbar() {
         <Link to="/posts" className="nav-link">Feed</Link>
         <Link to={`/profile/${userId}`} className="nav-link">Profile</Link>
         <Link to="/friends" className="nav-link">Friends</Link>
-        <Link to="/forgot-password" className="nav-link">Forgot Password</Link>
       </div>
       
       <div className="navbar-right">
