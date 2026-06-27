@@ -72,7 +72,7 @@ A full-stack social media web application built with the MERN stack (MongoDB, Ex
 │   ├── cloudinaryConfig.js         # Cloudinary + multer upload config
 │   ├── controllers/
 │   │   ├── authentication.js       # POST /tokens — login
-│   │   ├── comments.js             # Create comment, toggle comment like
+│   │   ├── comments.js             # Create comment, edit comment, toggle comment like
 │   │   ├── friends.js              # Get friends list
 │   │   ├── friendRequests.js       # Send / accept / decline / remove
 │   │   ├── passwordReset.js        # Request reset token, apply new password
@@ -322,9 +322,10 @@ Routes marked **Auth required** expect: `Authorization: Bearer <token>`
 |---|---|---|---|---|
 | `GET` | `/posts` | Yes | — | Get all posts (newest first) with comments attached |
 | `POST` | `/posts` | Yes | `{ message, image }` | Create a post |
-| `PATCH` | `/posts/:id` | Yes | `{ message?, image? }` | Update a post's text and/or image (owner only) |
+| `PUT` | `/posts/:id` | Yes | `{ message?, image? }` | Update a post's text and/or image (owner only) |
 | `POST` | `/posts/:id/like` | Yes | — | Toggle like on post `:id` |
 | `POST` | `/posts/:id/comments` | Yes | `{ message }` | Add a comment to post `:id` |
+| `PUT` | `/posts/:id/comments/:commentId` | Yes | `{ message }` | Edit a comment (owner only) |
 | `POST` | `/posts/:id/comments/:commentId/like` | Yes | — | Toggle like on comment `:commentId` |
 
 ### Friends
@@ -375,8 +376,8 @@ Routes marked **Auth required** expect: `Authorization: Bearer <token>`
 
 ### Post images (on feed and edit)
 - The frontend uploads the image **directly to Cloudinary** from the browser using an unsigned upload preset
-- Once Cloudinary returns the URL, the frontend sends `POST /posts` (create) or `PATCH /posts/:id` (edit) with the URL as the `image` field
-- To remove an image when editing, the frontend sends `PATCH /posts/:id` with `image: ""`
+- Once Cloudinary returns the URL, the frontend sends `POST /posts` (create) or `PUT /posts/:id` (edit) with the URL as the `image` field
+- To remove an image when editing, the frontend sends `PUT /posts/:id` with `image: ""`
 - This avoids routing large files through the server
 
 To set up your own Cloudinary upload preset for post images:
