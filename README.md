@@ -4,6 +4,10 @@ A full-stack social media web application built with the MERN stack (MongoDB, Ex
 
 ---
 
+This started as a team project at Makers Academy 2026, which I then continued developing solo. About 40% of the final codebase comes from the original legacy codebase and team-phase build (branding, color palette, CSS, and auth handling) — of which roughly two-thirds is my own team-phase work (navbar/routing, profile page, user display, and post functionality). My colleagues had also built a friends-following feature during the team phase, which I removed and replaced with my own friend-request system. Everything else was removed, added, or substantially rewritten by me afterwards.
+
+---
+
 ## Table of Contents
 
 - [Features](#features)
